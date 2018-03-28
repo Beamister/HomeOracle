@@ -11,5 +11,12 @@
 
 class LRModel:
 
-    def __init__(self, trainigSet):
+    def __init__(self):
         print("Generated model")
+
+    def trainModel(self, trainingInputs, trainingOutputs):
+        print("training")
+
+    def queryModel(self, inputData):
+        print("querying")
+        return 0

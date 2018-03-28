@@ -16,7 +16,7 @@ class DataSet:
     def __init__(self, sources):
         self.data = {}
         for key in sources:
-            self.loadDataSet(self, key, sources[key])
+            self.loadDataSet(key, sources[key][0])
         self.sources = sources
 
     def loadDataSet(self, sourceName, sourceFile):
@@ -25,10 +25,10 @@ class DataSet:
         with open(sourceFile, "r", encoding = "utf8") as file:
             for line in file:
                 line.strip()
-                currentRow = line.split(",")
+                currentRow = line.split(" ")
+                currentRow = [i for i in currentRow if i != ""]
                 list(map(float, currentRow))
-                dataSet[rowNumber] = currentRow
-                rowNumber += 1
+                dataSet.append(currentRow)
         self.data[sourceName] = dataSet
 
     def getSourceNames(self):
@@ -49,9 +49,11 @@ class DataSet:
         return variables
 
     def getTrainingOutputs(self, source):
-        targetColumn = self.sources[source][1]
-        dataSet = numpy.array(self.dataSet[source]).transpose().tolist()
-        return dataSet[targetColumn]
+        dataSet = numpy.array(self.data[source]).transpose().tolist()
+        trainingOutputs = []
+        for outputColumn in self.sources[source][1]:
+            trainingOutputs.append(dataSet[outputColumn])
+        return trainingOutputs
 
     def getTrainingInputs(self, source):
         ignoredColumns = self.sources[source][2]
@@ -61,11 +63,10 @@ class DataSet:
                           if not(i in ignoredColumns or i == targetColumn)]
         trainingInputs = []
         #Get data and transpose it
-        dataSet = numpy.array(self.dataSet[source]).transpose().tolist()
+        dataSet = numpy.array(self.data[source]).transpose().tolist()
         for i in desiredColumns:
             trainingInputs.append(dataSet[i])
-        #Undo first transposition
-        return numpy.array(trainingInputs).transpose().tolist()
+        return trainingInputs
 
 
     #Returns the data associated with the given source

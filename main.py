@@ -18,8 +18,8 @@ from LRModel import LRModel
 from tkinter import *
 
 #Dictionary of data sources, key is user name, value is a list of attributes,
-#attributes - filename, target column index, columns to ignore, column names
-dataSources = {"Boston":["Filename", 13, [11],
+#attributes - filename, output column indices, columns to ignore, column names
+dataSources = {"Boston":["Data/housing.csv", [13], [11],
                          ["Crime", "Residential", "Industrial", "River Boundary", "Nitric Oxide",
                           "Rooms", "Pre 1940", "Employment distance", "Accessibility", "Tax",
                           "Education", "Blacks", "Lower Status", "Median Value"]]}
