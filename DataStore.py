@@ -9,9 +9,9 @@
 #
 ################################################
 
-import numpy
+from numpy import *
 
-class DataSet:
+class DataStore:
 
     def __init__(self, sources):
         self.data = {}
@@ -21,15 +21,14 @@ class DataSet:
 
     def loadDataSet(self, sourceName, sourceFile):
         dataSet = []
-        rowNumber = 0
         with open(sourceFile, "r", encoding = "utf8") as file:
             for line in file:
                 line.strip()
                 currentRow = line.split(" ")
-                currentRow = [i for i in currentRow if i != ""]
+                currentRow = [float(i) for i in currentRow if i != ""]
                 list(map(float, currentRow))
                 dataSet.append(currentRow)
-        self.data[sourceName] = dataSet
+        self.data[sourceName] = array(dataSet)
 
     def getSourceNames(self):
         names = []
@@ -44,29 +43,24 @@ class DataSet:
         ignoredColumns = self.sources[source][2]
         targetColumn = self.sources[source][1]
         for i in range(len(columns)):
-            if not(i in ignoredColumns or i == targetColumn):
+            if not(i in ignoredColumns or i in targetColumn):
                 variables.append(columns[i])
         return variables
 
+    #Returns an array of shape[n samples][n values]
     def getTrainingOutputs(self, source):
-        dataSet = numpy.array(self.data[source]).transpose().tolist()
-        trainingOutputs = []
-        for outputColumn in self.sources[source][1]:
-            trainingOutputs.append(dataSet[outputColumn])
-        return trainingOutputs
+        dataSet = self.data[source]
+        targetColumns = self.sources[source][1]
+        return dataSet[:, targetColumns]
 
     def getTrainingInputs(self, source):
         ignoredColumns = self.sources[source][2]
-        targetColumn = self.sources[source][1]
+        targetColumns = self.sources[source][1]
         columnCount = len(self.data[source][0])
         desiredColumns = [i for i in range(columnCount)
-                          if not(i in ignoredColumns or i == targetColumn)]
-        trainingInputs = []
-        #Get data and transpose it
-        dataSet = numpy.array(self.data[source]).transpose().tolist()
-        for i in desiredColumns:
-            trainingInputs.append(dataSet[i])
-        return trainingInputs
+                          if not(i in ignoredColumns or i in targetColumns)]
+        dataSet = self.data[source]
+        return dataSet[:, desiredColumns]
 
 
     #Returns the data associated with the given source

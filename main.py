@@ -12,7 +12,7 @@
 ################################################
 from tkinter import messagebox
 
-from DataSet import DataSet
+from DataStore import DataStore
 from GUI import GUI
 from LRModel import LRModel
 from tkinter import *
@@ -23,10 +23,10 @@ dataSources = {"Boston":["Data/housing.csv", [13], [11],
                          ["Crime", "Residential", "Industrial", "River Boundary", "Nitric Oxide",
                           "Rooms", "Pre 1940", "Employment distance", "Accessibility", "Tax",
                           "Education", "Blacks", "Lower Status", "Median Value"]]}
-dataSet = DataSet(dataSources)
+dataStore = DataStore(dataSources)
 linearRegressionModel = LRModel()
 models = {"LRModel" : linearRegressionModel}
 root = Tk()
 root.wm_title("House Price Impact Calculator")
-gui = GUI(root, models, dataSet)
+gui = GUI(root, models, dataStore)
 root.mainloop()

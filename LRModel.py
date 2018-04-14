@@ -9,14 +9,22 @@
 #
 ################################################
 
+from sklearn import linear_model
+from numpy import *
+
 class LRModel:
 
     def __init__(self):
-        print("Generated model")
+        self.model = linear_model.LinearRegression()
+
 
     def trainModel(self, trainingInputs, trainingOutputs):
-        print("training")
+        self.model.fit(array(trainingInputs), array(trainingOutputs))
 
     def queryModel(self, inputData):
-        print("querying")
-        return 0
+        startInput = array(inputData[0:-1:2], ndmin = 2)
+        endInput = array(inputData[1:-1:2], ndmin = 2)
+        startPrice = inputData[-1]
+        startPredict = float(self.model.predict(startInput)[0][0])
+        endPredict = float(self.model.predict(endInput)[0][0])
+        return startPrice * (endPredict / startPredict)

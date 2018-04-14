@@ -14,10 +14,10 @@ from tkinter import messagebox
 
 class GUI:
 
-    def __init__(self, master, models, dataSet):
+    def __init__(self, master, models, dataStore):
         self. master = master
         self.models = models
-        self.dataSet = dataSet
+        self.dataStore = dataStore
         self.trained = False
         self.currentSourceVar = StringVar(self.master)
         self.currentSourceVar.set("None")
@@ -26,7 +26,7 @@ class GUI:
         self.currentModelVar.set("None")
         self.currentModel = "None"
         self.modelList = list(models.keys())
-        self.sourceList = dataSet.getSourceNames()
+        self.sourceList = dataStore.getSourceNames()
         self.frame = Frame(self.master)
         self.frame.pack()
         self.title = Label(self.frame, text = "Predict how your house price will change")
@@ -58,8 +58,8 @@ class GUI:
         elif(self.currentSource == "None"):
             messagebox.showerror("Error", "You have not yet selected a data set")
         else:
-            self.models[self.currentModel].trainModel(self.dataSet.getTrainingInputs(self.currentSource),
-                                                      self.dataSet.getTrainingOutputs(self.currentSource))
+            self.models[self.currentModel].trainModel(self.dataStore.getTrainingInputs(self.currentSource),
+                                                      self.dataStore.getTrainingOutputs(self.currentSource))
             self.trained = True
 
 
@@ -67,8 +67,8 @@ class GUI:
         if(self.trained == True):
             inputValues = []
             for input in self.inputs:
-                inputValues.append(input.get())
-            inputValues.append(self.priceInput.get())
+                inputValues.append(float(input.get()))
+            inputValues.append(float(self.priceInput.get()))
             result = self.models[self.currentModel].queryModel(inputValues)
             self.priceOutput.delete(0, 'end')
             self.priceOutput.insert(0, result)
@@ -88,13 +88,13 @@ class GUI:
     def generateVariableFields(self, sourceName):
         self.variablesFrame = Frame(self.frame)
         self.variablesFrame.grid(row = 2, column = 0, columnspan = 2)
-        variables = self.dataSet.getVariableNames(sourceName)
+        variables = self.dataStore.getVariableNames(sourceName)
         self.inputs = []
         currentRow = 0
         for variable in variables:
             startVariableLabel = Label(self.variablesFrame, text = "Starting " + variable + " value")
             startVariableLabel.grid(row = currentRow, column = 0)
-            startVariableInput = Entry(self.variablesFrame)
+            startVariableInput = Entry(self.variablesFrame, validate = 'key')
             startVariableInput.grid(row = currentRow, column = 1)
             endVariableLabel = Label(self.variablesFrame, text="Finishing " + variable + " value")
             endVariableLabel.grid(row=currentRow, column = 2)
@@ -103,3 +103,8 @@ class GUI:
             self.inputs.append(startVariableInput)
             self.inputs.append(endVariableInput)
             currentRow += 1
+
+    def copyFieldValue(self, sourceArea, destArea):
+        print("Test")
+        destArea.delete(0, 'end')
+        destArea.insert(0, sourceArea.get())
