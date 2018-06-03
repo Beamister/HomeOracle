@@ -10,11 +10,10 @@
 #   their local area.
 #
 ################################################
-from tkinter import messagebox
 
-from DataStore import DataStore
-from GUI import GUI
-from LRModel import LRModel
+from Prototype.DataStore import DataStore
+from Prototype.GUI import GUI
+from Prototype.LRModel import LRModel
 from tkinter import *
 
 #Dictionary of data sources, key is user name, value is a list of attributes,
@@ -22,7 +21,7 @@ from tkinter import *
 dataSources = {"Boston":["Data/housing.csv", [13], [11],
                          ["Crime", "Residential", "Industrial", "River Boundary", "Nitric Oxide",
                           "Rooms", "Pre 1940", "Employment distance", "Accessibility", "Tax",
-                          "Education", "Blacks", "Lower Status", "Median Value"]]}
+                          "Education", "Black Population", "Lower Status", "Median Value"]]}
 dataStore = DataStore(dataSources)
 linearRegressionModel = LRModel()
 models = {"LRModel" : linearRegressionModel}
