@@ -1,3 +1,4 @@
+from os import listdir
 from os.path import isfile, join
 import dash
 import dash_core_components as dcc
@@ -7,20 +8,15 @@ import pandas as pd
 import plotly.graph_objs as go
 from sklearn import linear_model as lm
 from numpy import *
+from server import *
+from constants import *
 
-app = dash.Dash()
-app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
-
-dataFileList = [f for f in os.listdir("Data") if isfile(join("Data", f))]
-
-defaultData = pd.read_csv("Data/housing.csv", sep='\s+',
-                          names=["Crime", "Residential", "Industrial", "River Boundary", "Nitric Oxide",
-                                 "Rooms", "Pre 1940", "Employment distance", "Accessibility", "Tax",
-                                 "Education", "Black Population", "Lower Status", "Median Value"])
+dataFileList = [f for f in listdir(dataDirectoryPath) if isfile(join(dataDirectoryPath, f))]
+defaultData = pd.read_csv(defaultDataPath, sep='\s+', names=defaultDataHeaders)
 
 dataStore = {"housing.csv": defaultData}
 
-app.layout = html.Div(
+layout = html.Div(
     [
         html.H1(children="Raw Data View", id="title"),
         html.Div(
@@ -98,8 +94,8 @@ app.layout = html.Div(
             ],
             style={'width': '100%', 'display': 'block'}),
 
-        dcc.Graph(id='graphView'),
-        dt.DataTable(
+         dcc.Graph(id='graphView'),
+         dt.DataTable(
             id='tableView',
             row_selectable=True,
             rows=[{}],
@@ -108,7 +104,6 @@ app.layout = html.Div(
             selected_row_indices=[]
         )
     ])
-
 
 @app.callback(
     dash.dependencies.Output('tableView', 'rows'),
