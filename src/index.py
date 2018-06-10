@@ -8,18 +8,28 @@ import dataView
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
+    dcc.Tabs(tabs=[{'label' : 'Home', 'value' : 'home'},
+                   {'label' : 'Data Viewer', 'value' : 'dataView'}],
+             id='tabs',
+             value='dataView'),
     html.Div(id='page-content'),
     #Hidden table required due to Dash design flaw, ensures table module is loaded
     html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'})
 ])
 
+@app.callback(Output('tabs', 'value'),
+              [Input('url', 'pathname')])
+def mapUrlToTab(pathname):
+    if(pathname == '/'):
+        return 'home'
+    return pathname[1:]
 
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
-def display_page(pathname):
-    if pathname == '/dataview':
+              [Input('tabs', 'value')])
+def display_page(value):
+    if value == 'dataView':
         return dataView.layout
-    elif pathname == '/':
+    elif value == 'home':
         return 'Welcome to the home page'
     else:
         return '404'
