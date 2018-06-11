@@ -99,6 +99,7 @@ layout = html.Div(
             id='tableView',
             row_selectable=True,
             rows=[{}],
+            editable=True,
             filterable=True,
             sortable=True,
             selected_row_indices=[]
@@ -109,7 +110,6 @@ layout = html.Div(
     dash.dependencies.Output('tableView', 'rows'),
     [dash.dependencies.Input('fileSelect', 'value')])
 def updateTable(selectedFile):
-    print("Test1")
     if not (selectedFile in dataStore):
         dataStore[selectedFile] = pd.read_csv("Data/" + selectedFile, sep='\s+')
     return dataStore[selectedFile].to_dict('records')
@@ -117,50 +117,40 @@ def updateTable(selectedFile):
 
 @app.callback(
     dash.dependencies.Output('XAxisSelect', 'options'),
-    [dash.dependencies.Input('tableView', 'rows')],
-    [dash.dependencies.State('fileSelect', 'value')])
-def updateXAxisSelectOptions(rows, selectedFile):
-    print("Test2")
+    [dash.dependencies.Input('fileSelect', 'value')])
+def updateXAxisSelectOptions(selectedFile):
     return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
 
 
 @app.callback(dash.dependencies.Output('XAxisSelect', 'value'),
               [dash.dependencies.Input('XAxisSelect', 'options')])
 def updateXAxisSelectValue(options):
-    print("Test3")
-    print(options[0].values())
     return options[0]['value']
 
 
 @app.callback(
     dash.dependencies.Output('YAxisSelect', 'options'),
-    [dash.dependencies.Input('tableView', 'rows')],
-    [dash.dependencies.State('fileSelect', 'value')])
-def updateYAxisSelectOptions(rows, selectedFile):
-    print("Test4")
+    [dash.dependencies.Input('fileSelect', 'value')])
+def updateYAxisSelectOptions(selectedFile):
     return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
 
 
 @app.callback(dash.dependencies.Output('YAxisSelect', 'value'),
               [dash.dependencies.Input('YAxisSelect', 'options')])
 def updateYAxisSelectValue(options):
-    print("Test5")
     return options[0]['value']
 
 
 @app.callback(
     dash.dependencies.Output('ZAxisSelect', 'options'),
-    [dash.dependencies.Input('tableView', 'rows')],
-    [dash.dependencies.State('fileSelect', 'value')])
-def updateZAxisSelectOptions(rows, selectedFile):
-    print("Test6")
+    [dash.dependencies.Input('fileSelect', 'value')])
+def updateZAxisSelectOptions(selectedFile):
     return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
 
 
 @app.callback(dash.dependencies.Output('ZAxisSelect', 'value'),
               [dash.dependencies.Input('ZAxisSelect', 'options')])
 def updateXAxisSelectValue(options):
-    print("Test7")
     return options[0]['value']
 
 
@@ -168,26 +158,40 @@ def updateXAxisSelectValue(options):
     dash.dependencies.Output('ZSelectContainer', 'style'),
     [dash.dependencies.Input('dimensionSelect', 'value')])
 def updateInputDimensions(selectedDimension):
-    print("Test8")
     if (selectedDimension == '2D'):
         return {'display': 'none'}
     else:
         return {'display': 'inline-block', 'width': '30%'}
 
+@app.callback(
+    dash.dependencies.Output('tableView', 'selected_row_indices'),
+    [dash.dependencies.Input('graphView', 'clickData')],
+    [dash.dependencies.State('tableView', 'selected_row_indices')])
+def highlightClickDataPointsInTable(clickData, selectedIndices):
+    if clickData:
+        for point in clickData['points']:
+            if point['pointNumber'] in selectedIndices:
+                selectedIndices.remove(point['pointNumber'])
+            else:
+                selectedIndices.append(point['pointNumber'])
+    return selectedIndices
 
 @app.callback(
     dash.dependencies.Output('graphView', 'figure'),
     [dash.dependencies.Input('dimensionSelect', 'value'),
      dash.dependencies.Input('XAxisSelect', 'value'),
      dash.dependencies.Input('YAxisSelect', 'value'),
-     dash.dependencies.Input('ZAxisSelect', 'value')],
-    [dash.dependencies.State('fileSelect', 'value')])
-def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, selectedFile):
-    dataFrame = dataStore[selectedFile]
+     dash.dependencies.Input('ZAxisSelect', 'value'),
+     dash.dependencies.Input('tableView', 'rows'),
+     dash.dependencies.Input('tableView', 'selected_row_indices')])
+def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selectedIndices):
+    dataFrame = pd.DataFrame(rows)
+    markerColours = [blue] * len(dataFrame)
+    if(selectedIndices != None):
+        for i in (selectedIndices):
+            markerColours[i] = orange
     if dimensionSelect == '2D':
         linearModel = lm.LinearRegression()
-        print("X name: ")
-        print(xaxisName)
         a1 = array(dataFrame[xaxisName], ndmin=2).transpose()
         a2 = array(dataFrame[yaxisName], ndmin=2).transpose()
         linearModel.fit(a1, a2)
@@ -195,17 +199,19 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, selectedFile)
             'data':
                 [
                     go.Scatter(
+                        name='data',
                         x=dataFrame[xaxisName],
                         y=dataFrame[yaxisName],
-                        text="(Value, {})".format(xaxisName),
+                        text="({}, {})".format(xaxisName, yaxisName),
                         mode='markers',
                         marker={
                             'size': 15,
                             'opacity': 0.5,
-                            'line': {'width': 0.5, 'color': 'white'}
+                            'color' : markerColours
                         }
                     ),
                     go.Scatter(
+                        name='Regression Line',
                         x=[dataFrame[xaxisName].min(), dataFrame[xaxisName].max()],
                         y=[linearModel.predict(dataFrame[xaxisName].min())[0][0],
                            linearModel.predict(dataFrame[xaxisName].max())[0][0]],
@@ -233,6 +239,7 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, selectedFile)
             'data':
                 [
                     go.Scatter3d(
+                        name='data',
                         x=dataFrame[xaxisName],
                         y=dataFrame[yaxisName],
                         z=dataFrame[zaxisName],
@@ -240,7 +247,8 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, selectedFile)
                         mode='markers',
                         marker={
                             'size': 15,
-                            'opacity': 0.5
+                            'opacity': 0.5,
+                            'color' : markerColours
                         }
                     )
                 ],

@@ -7,7 +7,7 @@ import dataView
 
 
 app.layout = html.Div([
-    dcc.Location(id='url', refresh=False),
+    #dcc.Location(id='url', refresh=False),
     dcc.Tabs(tabs=[{'label' : 'Home', 'value' : 'home'},
                    {'label' : 'Data Viewer', 'value' : 'dataView'}],
              id='tabs',
@@ -16,13 +16,6 @@ app.layout = html.Div([
     #Hidden table required due to Dash design flaw, ensures table module is loaded
     html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'})
 ])
-
-@app.callback(Output('tabs', 'value'),
-              [Input('url', 'pathname')])
-def mapUrlToTab(pathname):
-    if(pathname == '/'):
-        return 'home'
-    return pathname[1:]
 
 @app.callback(Output('page-content', 'children'),
               [Input('tabs', 'value')])
