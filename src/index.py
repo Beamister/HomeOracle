@@ -6,6 +6,7 @@ import dash_table_experiments as dt
 import dataView
 
 
+app.css.append_css({'external_url': 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
 app.layout = html.Div([
     #dcc.Location(id='url', refresh=False),
     dcc.Tabs(tabs=[{'label' : 'Home', 'value' : 'home'},
@@ -14,8 +15,9 @@ app.layout = html.Div([
              value='dataView'),
     html.Div(id='page-content'),
     #Hidden table required due to Dash design flaw, ensures table module is loaded
-    html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'})
-])
+    html.Div(dt.DataTable(rows=[{}]), style={'display' : 'none'}),
+    ]
+)
 
 @app.callback(Output('page-content', 'children'),
               [Input('tabs', 'value')])

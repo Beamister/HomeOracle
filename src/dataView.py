@@ -198,7 +198,7 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selecte
         return {
             'data':
                 [
-                    go.Scatter(
+                    go.Scattergl(
                         name='data',
                         x=dataFrame[xaxisName],
                         y=dataFrame[yaxisName],
@@ -210,7 +210,7 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selecte
                             'color' : markerColours
                         }
                     ),
-                    go.Scatter(
+                    go.Scattergl(
                         name='Regression Line',
                         x=[dataFrame[xaxisName].min(), dataFrame[xaxisName].max()],
                         y=[linearModel.predict(dataFrame[xaxisName].min())[0][0],
