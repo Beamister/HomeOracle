@@ -183,8 +183,9 @@ def highlightClickDataPointsInTable(clickData, selectedIndices):
      dash.dependencies.Input('YAxisSelect', 'value'),
      dash.dependencies.Input('ZAxisSelect', 'value'),
      dash.dependencies.Input('tableView', 'rows'),
-     dash.dependencies.Input('tableView', 'selected_row_indices')])
-def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selectedIndices):
+     dash.dependencies.Input('tableView', 'selected_row_indices')],
+    [dash.dependencies.State('graphView', 'figure')])
+def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selectedIndices, oldFigure):
     dataFrame = pd.DataFrame(rows)
     markerColours = [blue] * len(dataFrame)
     if(selectedIndices != None):
@@ -235,6 +236,10 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selecte
             )
         }
     else:
+        if oldFigure['data'][0]['type'] == 'scatter3d':
+            camera = oldFigure['layout']['scene']['camera']
+        else:
+            camera = default3DCamera
         return {
             'data':
                 [
@@ -257,9 +262,10 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selecte
                 margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
                 hovermode='closest',
                 scene=go.Scene(
+                    camera=camera,
                     xaxis=go.XAxis(title=xaxisName),
                     yaxis=go.YAxis(title=yaxisName),
-                    zaxis=go.ZAxis(title=zaxisName)
+                    zaxis=go.ZAxis(title=zaxisName),
                 )
             )
         }
