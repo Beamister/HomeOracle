@@ -1,9 +1,9 @@
 from os import listdir
 from os.path import isfile, join
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dt
+from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objs as go
 from sklearn import linear_model as lm
@@ -13,12 +13,14 @@ from constants import *
 
 dataFileList = [f for f in listdir(dataDirectoryPath) if isfile(join(dataDirectoryPath, f))]
 defaultData = pd.read_csv(defaultDataPath, sep='\s+', names=defaultDataHeaders)
+sortedHeaders = sorted(list(defaultDataHeaders))
+defaultData = defaultData[sortedHeaders]
 
-dataStore = {"housing.csv": defaultData}
+dataStore = {defaultDataFile: defaultData}
 
 layout = html.Div(
     [
-        html.H1(children="Raw Data View", id="title"),
+        html.H1(children='Raw Data View', id='title'),
         html.Div(
             [
                 html.Div(
@@ -92,10 +94,13 @@ layout = html.Div(
                     style={'display': 'flex'}
                 )
             ],
+            id='inputsContainer',
             style={'width': '100%', 'display': 'block'}),
 
-         dcc.Graph(id='graphView'),
-         dt.DataTable(
+        html.H2('Graph View'),
+        dcc.Graph(id='graphView'),
+        html.H2('Table View'),
+        dt.DataTable(
             id='tableView',
             row_selectable=True,
             rows=[{}],
@@ -103,60 +108,73 @@ layout = html.Div(
             filterable=True,
             sortable=True,
             selected_row_indices=[]
+        ),
+        html.H2('Data Summary'),
+        dt.DataTable(
+            id='dataDescription',
+            row_selectable=False,
+            rows=[{}],
+            editable=False,
+            filterable=False,
+            sortable=False
         )
-    ])
+    ]
+)
 
 @app.callback(
-    dash.dependencies.Output('tableView', 'rows'),
-    [dash.dependencies.Input('fileSelect', 'value')])
+    Output('tableView', 'rows'),
+    [Input('fileSelect', 'value')])
 def updateTable(selectedFile):
     if not (selectedFile in dataStore):
-        dataStore[selectedFile] = pd.read_csv("Data/" + selectedFile, sep='\s+')
+        newData = pd.read_csv("Data/" + selectedFile, sep='\s+')
+        sortedHeaders = sort(dataStore[selectedFile].columns.tolist())
+        newData = newData[sortedHeaders]
+        dataStore[selectedFile] = newData
     return dataStore[selectedFile].to_dict('records')
 
 
 @app.callback(
-    dash.dependencies.Output('XAxisSelect', 'options'),
-    [dash.dependencies.Input('fileSelect', 'value')])
+    Output('XAxisSelect', 'options'),
+    [Input('fileSelect', 'value')])
 def updateXAxisSelectOptions(selectedFile):
     return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
 
 
-@app.callback(dash.dependencies.Output('XAxisSelect', 'value'),
-              [dash.dependencies.Input('XAxisSelect', 'options')])
+@app.callback(Output('XAxisSelect', 'value'),
+              [Input('XAxisSelect', 'options')])
 def updateXAxisSelectValue(options):
     return options[0]['value']
 
 
 @app.callback(
-    dash.dependencies.Output('YAxisSelect', 'options'),
-    [dash.dependencies.Input('fileSelect', 'value')])
+    Output('YAxisSelect', 'options'),
+    [Input('fileSelect', 'value')])
 def updateYAxisSelectOptions(selectedFile):
     return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
 
 
-@app.callback(dash.dependencies.Output('YAxisSelect', 'value'),
-              [dash.dependencies.Input('YAxisSelect', 'options')])
+@app.callback(Output('YAxisSelect', 'value'),
+              [Input('YAxisSelect', 'options')])
 def updateYAxisSelectValue(options):
     return options[0]['value']
 
 
 @app.callback(
-    dash.dependencies.Output('ZAxisSelect', 'options'),
-    [dash.dependencies.Input('fileSelect', 'value')])
+    Output('ZAxisSelect', 'options'),
+    [Input('fileSelect', 'value')])
 def updateZAxisSelectOptions(selectedFile):
     return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
 
 
-@app.callback(dash.dependencies.Output('ZAxisSelect', 'value'),
-              [dash.dependencies.Input('ZAxisSelect', 'options')])
+@app.callback(Output('ZAxisSelect', 'value'),
+              [Input('ZAxisSelect', 'options')])
 def updateXAxisSelectValue(options):
     return options[0]['value']
 
 
 @app.callback(
-    dash.dependencies.Output('ZSelectContainer', 'style'),
-    [dash.dependencies.Input('dimensionSelect', 'value')])
+    Output('ZSelectContainer', 'style'),
+    [Input('dimensionSelect', 'value')])
 def updateInputDimensions(selectedDimension):
     if (selectedDimension == '2D'):
         return {'display': 'none'}
@@ -164,9 +182,9 @@ def updateInputDimensions(selectedDimension):
         return {'display': 'inline-block', 'width': '30%'}
 
 @app.callback(
-    dash.dependencies.Output('tableView', 'selected_row_indices'),
-    [dash.dependencies.Input('graphView', 'clickData')],
-    [dash.dependencies.State('tableView', 'selected_row_indices')])
+    Output('tableView', 'selected_row_indices'),
+    [Input('graphView', 'clickData')],
+    [State('tableView', 'selected_row_indices')])
 def highlightClickDataPointsInTable(clickData, selectedIndices):
     if clickData:
         for point in clickData['points']:
@@ -177,14 +195,14 @@ def highlightClickDataPointsInTable(clickData, selectedIndices):
     return selectedIndices
 
 @app.callback(
-    dash.dependencies.Output('graphView', 'figure'),
-    [dash.dependencies.Input('dimensionSelect', 'value'),
-     dash.dependencies.Input('XAxisSelect', 'value'),
-     dash.dependencies.Input('YAxisSelect', 'value'),
-     dash.dependencies.Input('ZAxisSelect', 'value'),
-     dash.dependencies.Input('tableView', 'rows'),
-     dash.dependencies.Input('tableView', 'selected_row_indices')],
-    [dash.dependencies.State('graphView', 'figure')])
+    Output('graphView', 'figure'),
+    [Input('dimensionSelect', 'value'),
+     Input('XAxisSelect', 'value'),
+     Input('YAxisSelect', 'value'),
+     Input('ZAxisSelect', 'value'),
+     Input('tableView', 'rows'),
+     Input('tableView', 'selected_row_indices')],
+    [State('graphView', 'figure')])
 def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selectedIndices, oldFigure):
     dataFrame = pd.DataFrame(rows)
     markerColours = [blue] * len(dataFrame)
@@ -270,6 +288,16 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selecte
             )
         }
 
+@app.callback(
+    Output('dataDescription', 'rows'),
+    [Input('tableView', 'rows')])
+def updateDescription(data):
+    dataDescription = pd.DataFrame(data).describe()
+    describtionHeaders = dataDescription.columns.tolist()
+    dataDescription['Attributes'] = pd.Series(summaryAttributes, index=dataDescription.index)
+    #Reorder so attributes are at the left of the table
+    dataDescription = dataDescription[['Attributes'] + describtionHeaders]
+    return dataDescription.to_dict('records')
 
 if __name__ == '__main__':
     app.run_server()
