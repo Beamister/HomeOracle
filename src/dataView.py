@@ -240,6 +240,8 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selecte
 
                 ],
             'layout': go.Layout(
+                height=800,
+                width=1300,
                 title="{} Over {}".format(yaxisName, xaxisName),
                 xaxis={
                     'title': xaxisName,
@@ -269,13 +271,15 @@ def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selecte
                         text="({}, {}, {})".format(xaxisName, yaxisName, zaxisName),
                         mode='markers',
                         marker={
-                            'size': 15,
+                            'size': 4,
                             'opacity': 0.5,
                             'color' : markerColours
                         }
                     )
                 ],
             'layout': go.Layout(
+                height=800,
+                width=1300,
                 title="{} Over {} Over {}".format(yaxisName, xaxisName, zaxisName),
                 margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
                 hovermode='closest',
