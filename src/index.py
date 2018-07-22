@@ -31,4 +31,4 @@ def display_page(value):
         return 'Welcome to the home page'
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=80)
+    app.run_server(debug=True)
