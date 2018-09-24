@@ -3,15 +3,17 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from server import *
 import dash_table_experiments as dt
-import dataView, propertyView
+import dataView, propertyView, sourcesView, modelsView
 
 
-app.css.append_css({'external_url': 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
+app.css.append_css({'external_url' : 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
 app.layout = html.Div([
     #dcc.Location(id='url', refresh=False),
     dcc.Tabs(tabs=[{'label' : 'Home', 'value' : 'home'},
-                   {'label' : 'Data Viewer', 'value' : 'dataView'},
-                   {'label' : 'Property View', 'value' : 'propertyView'}],
+                   {'label' : 'Data View', 'value' : 'dataView'},
+                   {'label' : 'Property View', 'value' : 'propertyView'},
+                   {'label' : 'Models View', 'value': 'modelsView'},
+                   {'label' : 'Sources View', 'value': 'sourcesView'}],
              id='tabs',
              value='dataView'),
     html.Div(id='page-content'),
@@ -27,8 +29,15 @@ def display_page(value):
         return dataView.layout
     elif value == 'propertyView':
         return  propertyView.layout
+    elif value == 'modelsView':
+        return modelsView.layout
+    elif value == 'sourcesView':
+        return sourcesView.layout
     else:
         return 'Welcome to the home page'
 
+application = app.server
+
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    application = app
+    application.run_server(debug=True)

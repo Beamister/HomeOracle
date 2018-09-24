@@ -1,9 +1,11 @@
-**/*.zip
+**.zip
 lib64
 lib
 bin
+**lock**
 **__pycache__**
 # Elastic Beanstalk Files
-.elasticbeanstalk/*
+**.elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+**.yml

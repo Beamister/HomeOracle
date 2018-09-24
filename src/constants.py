@@ -2,7 +2,7 @@ import os.path
 
 dataDirectory = "Data"
 defaultDataFile = "housing.csv"
-dataDirectoryPath = os.path.join(os.path.split(__file__)[0], '..', dataDirectory)
+dataDirectoryPath = os.path.join(os.path.split(__file__)[0], dataDirectory)
 defaultDataPath = os.path.join(dataDirectoryPath, defaultDataFile)
 defaultDataHeaders = ["Crime", "Residential", "Industrial", "River Boundary", "Nitric Oxide",
                       "Rooms", "Pre 1940", "Employment distance", "Accessibility", "Tax",
