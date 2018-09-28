@@ -11,14 +11,14 @@
 #
 ################################################
 
-from prototype.dataStore import DataStore
-from prototype.GUI import GUI
-from prototype.LRModel import LRModel
+from dataStore import DataStore
+from GUI import GUI
+from LRModel import LRModel
 from tkinter import *
 
 #Dictionary of data sources, key is user name, value is a list of attributes,
 #attributes - filename, output column indices, columns to ignore, column names
-dataSources = {"Boston":["../Data/housing.csv", [13], [11],
+dataSources = {"Boston":["housing.csv", [13], [11],
                          ["Crime", "Residential", "Industrial", "River Boundary", "Nitric Oxide",
                           "Rooms", "Pre 1940", "Employment distance", "Accessibility", "Tax",
                           "Education", "Black Population", "Lower Status", "Median Value"]]}

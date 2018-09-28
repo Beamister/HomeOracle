@@ -3,7 +3,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from server import *
 import dash_table_experiments as dt
-import dataView, propertyView, sourcesView, modelsView
+import dataView, propertyView, sourcesView, modelsView, indicatorsView
 
 
 app.css.append_css({'external_url' : 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
@@ -11,6 +11,7 @@ app.layout = html.Div([
     #dcc.Location(id='url', refresh=False),
     dcc.Tabs(tabs=[{'label' : 'Home', 'value' : 'home'},
                    {'label' : 'Data View', 'value' : 'dataView'},
+                   {'label' : 'Indicators View', 'value' : 'indicatorsView'},
                    {'label' : 'Property View', 'value' : 'propertyView'},
                    {'label' : 'Models View', 'value': 'modelsView'},
                    {'label' : 'Sources View', 'value': 'sourcesView'}],
@@ -33,6 +34,8 @@ def display_page(value):
         return modelsView.layout
     elif value == 'sourcesView':
         return sourcesView.layout
+    elif value == 'indicatorsView':
+        return indicatorsView.layout
     else:
         return 'Welcome to the home page'
 
