@@ -69,6 +69,12 @@ layout = html.Div(children=[
                                  options=[{'label' : 'Monthly', 'value' : 'monthly'},
                                           {'label' : 'Daily', 'value' : 'daily'},
                                           {'label' : 'Yearly', 'value' : 'yearly'}]),
+                    html.Div("Select location resolution:"),
+                    dcc.Dropdown(id='resolutionSelect',
+                                 options=[{'label' : 'Ward', 'value' : 'ward'},
+                                          {'label' : 'County', 'value' : 'county'},
+                                          {'label' : 'Parish', 'value' : 'parish'},
+                                          {'label' : 'Constuency', 'value': 'constituency'}]),
                     html.Div("Select number of indicators:"),
                     html.Div(id='indicatorCountContainer',
                              children=[
@@ -116,11 +122,12 @@ for index in range(maxSourceColumnCount):
                State('startDateSelect', 'date'),
                State('frequencySelect', 'value'),
                State('indicatorCountSelect', 'value'),
+               State('resolutionSelect', 'value'),
                State('startOptionSelect', 'value')]
               + [State('indicatorNameInput-' + str(index), 'value') for index in range(maxSourceColumnCount)]
               + [State('indicatorColumnInput-' + str(index), 'value') for index in range(maxSourceColumnCount)])
 def addSourceButtonClicked(numberOfClicks, sourceName, sourceURL, startDate, frequency,
-                           indicatorCount, startOption, *indicatorNamesAndColumns):
+                           indicatorCount, resolution, startOption, *indicatorNamesAndColumns):
     # Catch for when callback is called on page load
     if numberOfClicks == None:
         return ""
@@ -134,6 +141,8 @@ def addSourceButtonClicked(numberOfClicks, sourceName, sourceURL, startDate, fre
         feedbackMessage = "Please select start date"
     elif frequency == None:
         feedbackMessage = "Please select an update frequency"
+    elif resolution == None:
+        feedbackMessage = "Please select an area resolution"
     elif '' in indicatorNamesAndColumns[:indicatorCount]:
         feedbackMessage = "Please ensure that all indicators are given names"
     elif '' in indicatorNamesAndColumns[maxSourceColumnCount:maxSourceColumnCount + indicatorCount]:
@@ -149,6 +158,7 @@ def addSourceButtonClicked(numberOfClicks, sourceName, sourceURL, startDate, fre
         newSource = {'sourceTokens' : sourceURL.split(' '),
                        'startDate' : startDate,
                        'frequency' : frequency,
+                       'resolution' : resolution,
                        'indicators' : indicators}
         # Add source to file
         sourcesFile = open("sources.json", 'r')
