@@ -6,15 +6,15 @@ import dash_table_experiments as dt
 import dataView, propertyView, sourcesView, modelsView, indicatorsView
 
 
-app.css.append_css({'external_url' : 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
+#app.css.append_css({'external_url' : 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
 app.layout = html.Div([
     #dcc.Location(id='url', refresh=False),
-    dcc.Tabs(tabs=[{'label' : 'Home', 'value' : 'home'},
-                   {'label' : 'Data View', 'value' : 'dataView'},
-                   {'label' : 'Indicators View', 'value' : 'indicatorsView'},
-                   {'label' : 'Property View', 'value' : 'propertyView'},
-                   {'label' : 'Models View', 'value': 'modelsView'},
-                   {'label' : 'Sources View', 'value': 'sourcesView'}],
+    dcc.Tabs(children=[dcc.Tab(label='Home', value='home', className="myTab"),
+                       dcc.Tab(label='Data View', value='dataView', className="myTab"),
+                       dcc.Tab(label='Indicators View', value='indicatorsView', className="myTab"),
+                       dcc.Tab(label='Property View', value='propertyView', className="myTab"),
+                       dcc.Tab(label='Models View', value='modelsView', className="myTab"),
+                       dcc.Tab(label='Sources View', value='sourcesView', className="myTab")],
              id='tabs',
              value='dataView'),
     html.Div(id='page-content'),

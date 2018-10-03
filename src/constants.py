@@ -16,3 +16,4 @@ summaryAttributes = ['Count', 'Mean', 'STD', 'Min', '25%', '50%', '75%', 'Max']
 
 blue = '#0074D9'
 orange = '#FF851B'
+maxSourceColumnCount = 10
