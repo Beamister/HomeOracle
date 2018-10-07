@@ -131,11 +131,12 @@ def addSourceButtonClicked(numberOfClicks, sourceName, sourceURL, startDate, fre
     # Catch for when callback is called on page load
     if numberOfClicks == None:
         return ""
+    print(startDate)
     feedbackColor = 'red'
     # Input validation
-    if sourceName != '':
+    if sourceName == '':
         feedbackMessage = "Please add a source name"
-    elif sourceURL != '':
+    elif sourceURL == '':
         feedbackMessage = "Please add a source URL"
     elif startOption != 'startNow' and startDate == None:
         feedbackMessage = "Please select start date"
@@ -147,6 +148,8 @@ def addSourceButtonClicked(numberOfClicks, sourceName, sourceURL, startDate, fre
         feedbackMessage = "Please ensure that all indicators are given names"
     elif '' in indicatorNamesAndColumns[maxSourceColumnCount:maxSourceColumnCount + indicatorCount]:
         feedbackMessage = "Please ensure that all indicators are given a column index"
+    elif startOption == 'setDate' and startDate == None:
+        feedbackMessage = "Please ensure that a start date is set"
     else:
         if startOption == 'startNow':
             startDate = dt.now().date().strftime("%d/%m/%Y")
