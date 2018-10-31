@@ -1,22 +1,24 @@
 from os import listdir
 from os.path import isfile, join
+
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dt
-from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objs as go
-from sklearn import linear_model as lm
+from dash.dependencies import Input, Output, State
 from numpy import *
-from server import *
+from sklearn import linear_model as lm
+
 from constants import *
+from server import *
 
-dataFileList = [f for f in listdir(dataDirectoryPath) if isfile(join(dataDirectoryPath, f))]
-defaultData = pd.read_csv(defaultDataPath, sep='\s+', names=defaultDataHeaders)
-sortedHeaders = sorted(list(defaultDataHeaders))
-defaultData = defaultData[sortedHeaders]
+data_file_list = [f for f in listdir(DATA_DIRECTORY_PATH) if isfile(join(DATA_DIRECTORY_PATH, f))]
+default_data = pd.read_csv(DEFAULT_DATA_PATH, sep='\s+', names=DEFAULT_DATA_HEADERS)
+sorted_headers = sorted(list(DEFAULT_DATA_HEADERS))
+default_data = default_data[sorted_headers]
 
-dataStore = {defaultDataFile: defaultData}
+data_store = {DEFAULT_DATA_FILE: default_data}
 
 layout = html.Div(
     [
@@ -28,9 +30,9 @@ layout = html.Div(
                         html.Div('Select Data File', style={'display': 'block'}),
                         dcc.Dropdown(
                             id='fileSelect',
-                            options=[{'label': i, 'value': i} for i in list(dataFileList)],
+                            options=[{'label': i, 'value': i} for i in list(data_file_list)],
                             clearable=False,
-                            value=dataFileList[0]
+                            value=data_file_list[0]
                         )
                     ],
                     style={'display': 'block', 'width': '30%'}
@@ -40,8 +42,7 @@ layout = html.Div(
                         html.Div('Select Graph Dimensionality', style={'display': 'block'}),
                         dcc.RadioItems(
                             id='dimensionSelect',
-                            options=
-                            [
+                            options=[
                                 {'label': '2D', 'value': '2D'},
                                 {'label': '3D', 'value': '3D'}
                             ],
@@ -121,187 +122,192 @@ layout = html.Div(
     ]
 )
 
+
 @app.callback(
     Output('tableView', 'rows'),
     [Input('fileSelect', 'value')])
-def updateTable(selectedFile):
-    if not (selectedFile in dataStore):
-        newData = pd.read_csv("Data/" + selectedFile, sep='\s+')
-        sortedHeaders = sort(dataStore[selectedFile].columns.tolist())
-        newData = newData[sortedHeaders]
-        dataStore[selectedFile] = newData
-    return dataStore[selectedFile].to_dict('records')
+def update_table(selected_file):
+    if not (selected_file in data_store):
+        new_data = pd.read_csv("Data/" + selected_file, sep='\s+')
+        locacl_sorted_headers = sort(data_store[selected_file].columns.tolist())
+        new_data = new_data[locacl_sorted_headers]
+        data_store[selected_file] = new_data
+    return data_store[selected_file].to_dict('records')
 
 
 @app.callback(
     Output('XAxisSelect', 'options'),
     [Input('fileSelect', 'value')])
-def updateXAxisSelectOptions(selectedFile):
-    return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
+def update_x_axis_select_options(selected_file):
+    return [{'label': i, 'value': i} for i in list(data_store[selected_file])]
 
 
 @app.callback(Output('XAxisSelect', 'value'),
               [Input('XAxisSelect', 'options')])
-def updateXAxisSelectValue(options):
+def update_x_axis_select_value(options):
     return options[0]['value']
 
 
 @app.callback(
     Output('YAxisSelect', 'options'),
     [Input('fileSelect', 'value')])
-def updateYAxisSelectOptions(selectedFile):
-    return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
+def update_y_axis_select_options(selected_file):
+    return [{'label': i, 'value': i} for i in list(data_store[selected_file])]
 
 
 @app.callback(Output('YAxisSelect', 'value'),
               [Input('YAxisSelect', 'options')])
-def updateYAxisSelectValue(options):
+def update_y_axis_select_value(options):
     return options[0]['value']
 
 
 @app.callback(
     Output('ZAxisSelect', 'options'),
     [Input('fileSelect', 'value')])
-def updateZAxisSelectOptions(selectedFile):
-    return [{'label': i, 'value': i} for i in list(dataStore[selectedFile])]
+def update_z_axis_select_options(selected_file):
+    return [{'label': i, 'value': i} for i in list(data_store[selected_file])]
 
 
 @app.callback(Output('ZAxisSelect', 'value'),
               [Input('ZAxisSelect', 'options')])
-def updateXAxisSelectValue(options):
+def update_x_axis_select_value(options):
     return options[0]['value']
 
 
 @app.callback(
     Output('ZSelectContainer', 'style'),
     [Input('dimensionSelect', 'value')])
-def updateInputDimensions(selectedDimension):
-    if (selectedDimension == '2D'):
+def update_input_dimensions(selected_dimension):
+    if selected_dimension == '2D':
         return {'display': 'none'}
     else:
         return {'display': 'inline-block', 'width': '30%'}
+
 
 @app.callback(
     Output('tableView', 'selected_row_indices'),
     [Input('graphView', 'clickData')],
     [State('tableView', 'selected_row_indices')])
-def highlightClickDataPointsInTable(clickData, selectedIndices):
-    if clickData:
-        for point in clickData['points']:
-            if point['pointNumber'] in selectedIndices:
-                selectedIndices.remove(point['pointNumber'])
+def highlight_click_data_points_in_table(click_data, selected_indices):
+    if click_data:
+        for point in click_data['points']:
+            if point['pointNumber'] in selected_indices:
+                selected_indices.remove(point['pointNumber'])
             else:
-                selectedIndices.append(point['pointNumber'])
-    return selectedIndices
+                selected_indices.append(point['pointNumber'])
+    return selected_indices
+
 
 @app.callback(
     Output('graphView', 'figure'),
-    [Input('dimensionSelect', 'value'),
+    [Input('dimension_select', 'value'),
      Input('XAxisSelect', 'value'),
      Input('YAxisSelect', 'value'),
      Input('ZAxisSelect', 'value'),
      Input('tableView', 'rows'),
      Input('tableView', 'selected_row_indices')],
     [State('graphView', 'figure')])
-def update_graph(dimensionSelect, xaxisName, yaxisName, zaxisName, rows, selectedIndices, oldFigure):
-    dataFrame = pd.DataFrame(rows)
-    markerColours = [blue] * len(dataFrame)
-    if(selectedIndices != None):
-        for i in (selectedIndices):
-            markerColours[i] = orange
-    if dimensionSelect == '2D':
-        linearModel = lm.LinearRegression()
-        a1 = array(dataFrame[xaxisName], ndmin=2).transpose()
-        a2 = array(dataFrame[yaxisName], ndmin=2).transpose()
-        linearModel.fit(a1, a2)
+def update_graph(dimension_select, xaxis_name, yaxis_name, zaxis_name, rows, selected_indices, old_figure):
+    data_frame = pd.DataFrame(rows)
+    marker_colours = [BLUE] * len(data_frame)
+    if selected_indices is not None:
+        for i in selected_indices:
+            marker_colours[i] = ORANGE
+    if dimension_select == '2D':
+        linear_model = lm.LinearRegression()
+        a1 = array(data_frame[xaxis_name], ndmin=2).transpose()
+        a2 = array(data_frame[yaxis_name], ndmin=2).transpose()
+        linear_model.fit(a1, a2)
         return {
             'data':
                 [
                     go.Scattergl(
                         name='data',
-                        x=dataFrame[xaxisName],
-                        y=dataFrame[yaxisName],
-                        text="({}, {})".format(xaxisName, yaxisName),
+                        x=data_frame[xaxis_name],
+                        y=data_frame[yaxis_name],
+                        text="({}, {})".format(xaxis_name, yaxis_name),
                         mode='markers',
                         marker={
                             'size': 15,
                             'opacity': 0.5,
-                            'color' : markerColours
+                            'color': marker_colours
                         }
                     ),
                     go.Scattergl(
                         name='Regression Line',
-                        x=[dataFrame[xaxisName].min(), dataFrame[xaxisName].max()],
-                        y=[linearModel.predict(dataFrame[xaxisName].min())[0][0],
-                           linearModel.predict(dataFrame[xaxisName].max())[0][0]],
+                        x=[data_frame[xaxis_name].min(), data_frame[xaxis_name].max()],
+                        y=[linear_model.predict(data_frame[xaxis_name].min())[0][0],
+                           linear_model.predict(data_frame[xaxis_name].max())[0][0]],
                         mode='line',
                         line={'color': 'black', 'width': 5}
                     )
 
                 ],
             'layout': go.Layout(
-                height=800,
-                width=1300,
-                title="{} Over {}".format(yaxisName, xaxisName),
-                xaxis={
-                    'title': xaxisName,
-                    'type': 'linear'
-                },
-                yaxis={
-                    'title': yaxisName,
-                    'type': 'linear'
-                },
-                margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
-                hovermode='closest'
-            )
+                        height=800,
+                        width=1300,
+                        title="{} Over {}".format(yaxis_name, xaxis_name),
+                        xaxis={
+                            'title': xaxis_name,
+                            'type': 'linear'
+                        },
+                        yaxis={
+                            'title': yaxis_name,
+                            'type': 'linear'
+                        },
+                        margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
+                        hovermode='closest'
+                        )
         }
     else:
-        if oldFigure['data'][0]['type'] == 'scatter3d':
-            camera = oldFigure['layout']['scene']['camera']
+        if old_figure['data'][0]['type'] == 'scatter3d':
+            camera = old_figure['layout']['scene']['camera']
         else:
-            camera = default3DCamera
+            camera = default_3d_camera
         return {
             'data':
                 [
                     go.Scatter3d(
                         name='data',
-                        x=dataFrame[xaxisName],
-                        y=dataFrame[yaxisName],
-                        z=dataFrame[zaxisName],
-                        text="({}, {}, {})".format(xaxisName, yaxisName, zaxisName),
+                        x=data_frame[xaxis_name],
+                        y=data_frame[yaxis_name],
+                        z=data_frame[zaxis_name],
+                        text="({}, {}, {})".format(xaxis_name, yaxis_name, zaxis_name),
                         mode='markers',
                         marker={
                             'size': 4,
                             'opacity': 0.5,
-                            'color' : markerColours
+                            'color': marker_colours
                         }
                     )
                 ],
             'layout': go.Layout(
-                height=800,
-                width=1300,
-                title="{} Over {} Over {}".format(yaxisName, xaxisName, zaxisName),
-                margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
-                hovermode='closest',
-                scene=go.Scene(
-                    camera=camera,
-                    xaxis=go.XAxis(title=xaxisName),
-                    yaxis=go.YAxis(title=yaxisName),
-                    zaxis=go.ZAxis(title=zaxisName),
-                )
-            )
+                        height=800,
+                        width=1300,
+                        title="{} Over {} Over {}".format(yaxis_name, xaxis_name, zaxis_name),
+                        margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
+                        hovermode='closest',
+                        scene=go.Scene(
+                            camera=camera,
+                            xaxis=go.XAxis(title=xaxis_name),
+                            yaxis=go.YAxis(title=yaxis_name),
+                            zaxis=go.ZAxis(title=zaxis_name),
+                        )
+                      )
         }
+
 
 @app.callback(
     Output('dataDescription', 'rows'),
     [Input('tableView', 'rows')])
-def updateDescription(data):
-    dataDescription = pd.DataFrame(data).describe()
-    describtionHeaders = dataDescription.columns.tolist()
-    dataDescription['Attributes'] = pd.Series(summaryAttributes, index=dataDescription.index)
-    #Reorder so attributes are at the left of the table
-    dataDescription = dataDescription[['Attributes'] + describtionHeaders]
-    return dataDescription.to_dict('records')
+def update_description(data):
+    data_descriptions = pd.DataFrame(data).describe()
+    describtion_headers = data_descriptions.columns.tolist()
+    data_descriptions['Attributes'] = pd.Series(SUMMARY_ATTRIBUTES, index=data_descriptions.index)
+    # Reorder so attributes are at the left of the table
+    data_descriptions = data_descriptions[['Attributes'] + describtion_headers]
+    return data_descriptions.to_dict('records')
+
 
 if __name__ == '__main__':
     app.run_server()
