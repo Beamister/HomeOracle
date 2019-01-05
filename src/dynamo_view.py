@@ -17,37 +17,18 @@ layout = html.Div(children=[
     dcc.Dropdown(id='dataSetSelect',
                  value='sources',
                  options=[{'label': 'Sources', 'value': 'sources'},
-                          {'label': 'Indicator', 'value': 'indicators'}
                           ]),
-    html.Div(id='indicatorSelectContainer',
-             style={'display': 'none'},
-             children=[
-                 dcc.Dropdown(id='indicatorSelect',
-                              options=[{'label': indicator, 'value': indicator}
-                                       for indicator in indicators],
-                              value=indicators[0])
-             ]),
     html.Div(id='outputArea',
              style={'overflow-y': 'scroll', 'white-space': 'pre', 'height': '40em'})
 ])
 
 
-@app.callback(Output('indicatorSelectContainer', 'style'),
-              [Input('dataSetSelect', 'value')])
-def update_display_indicator_select(data_set):
-    if data_set == 'sources':
-        return {'display': 'none'}
-    else:
-        return {'display': 'block'}
 
 
 @app.callback(Output('outputArea', 'children'),
-              [Input('dataSetSelect', 'value'),
-               Input('indicatorSelect', 'value')])
-def update_output_area(data_set, indicator):
+              [Input('dataSetSelect', 'value')])
+def update_output_area(data_set):
     if data_set == 'sources':
         data = sources_data
         # jsonString = json.dumps(sources_data,  indent='\t')
-    else:
-        data = indicators_table.get_item(Key={'IndicatorName': indicator})['Item']
     return json.dumps(data, indent='\t')

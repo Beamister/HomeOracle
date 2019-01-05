@@ -94,17 +94,12 @@ layout = html.Div(children=[
                                        ]),
                               html.Div("Select update frequency:"),
                               dcc.Dropdown(id='frequencySelect',
-                                           options=[{'label': 'Monthly', 'value': 'monthly'},
-                                                    {'label': 'Daily', 'value': 'daily'},
-                                                    {'label': 'Yearly', 'value': 'yearly'}]),
+                                           options=[{'label' : FREQUENCIES[value], 'value' : value}
+                                                    for value in FREQUENCIES]),
                               html.Div("Select location resolution:"),
                               dcc.Dropdown(id='resolutionSelect',
-                                           options=[{'label': 'Ward', 'value': 'ward'},
-                                                    {'label': 'County', 'value': 'county'},
-                                                    {'label': 'Parish', 'value': 'parish'},
-                                                    {'label': 'Constuency', 'value': 'constituency'},
-                                                    {'label': 'Police Force', 'value': 'police'},
-                                                    {'label': 'Individual', 'value': 'individual'}]),
+                                           options=[{'label' : AREA_RESOLUTIONS[value], 'value' : value}
+                                                    for value in AREA_RESOLUTIONS]),
                               html.Div("Select number of indicators:"),
                               html.Div(id='indicatorCountContainer',
                                        children=[
@@ -171,6 +166,52 @@ def validate_input(source_name, source_url, start_date, location_column_index, f
         feedback_message = "Please ensure that a start date is set"
     return feedback_message
 
+#takes a date token and splits into separate day, month, year and static tokens
+def split_date_token(date_token):
+    tokens = []
+    token_index = -1
+    current_type = None
+    quote = False
+    for character in date_token:
+        if quote:
+            tokens[token_index] += character
+            if character == '"':
+                quote = False
+        elif character == '"':
+            tokens.append('-s')
+            token_index += 1
+            tokens.append('')
+            token_index += 1
+            quote = True
+        elif character in ['d', 'm', 'y'] and character != current_type:
+            current_type = character
+            tokens.append('-' + character)
+            token_index += 1
+            tokens.append('')
+            token_index += 1
+            tokens[token_index] += character
+        else:
+            tokens[token_index] += character
+    return tokens
+
+#takes the url input string and process it into a list, splits date tokens into component parts
+def process_url_input(url_input_string):
+    tokens = url_input_string.split(' ')
+    while '-d' in tokens:
+        date_token_specifier_index = tokens.index('-d')
+        #get the date token after the -d
+        date_token = tokens[date_token_specifier_index + 1]
+        #remove the date token and its specifier
+        del tokens[date_token_specifier_index]
+        del tokens[date_token_specifier_index + 1]
+        #split up the date token and insert it into the tokens list
+        if date_token_specifier_index > len(tokens) - 1:
+            tokens = tokens[0: date_token_specifier_index] + split_date_token(date_token)
+        else:
+            tokens = tokens[0 : date_token_specifier_index] + split_date_token(date_token)\
+                     + tokens[date_token_specifier_index :]
+    return tokens
+
 
 @app.callback(Output('feedbackContainer', 'children'),
               [Input('addSourceButton', 'n_clicks')],
@@ -196,9 +237,10 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
         feedback_message = validation_result
     else:
         if start_option == 'startNow':
-            start_date = dt.now().date()
+            start_date = dt.now()
         else:
             start_date = dt.strptime(start_date, '%Y-%m-%d')
+        start_date.replace()
         start_date_string = start_date.strfttime("%d/%m/%Y")
         indicators = {}
         for i in range(indicator_count):
@@ -219,7 +261,8 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
             feedback_message = "Successfully updated source: " + source_name
         else:
             feedback_message = "Successfully added new source: " + source_name
-        job_manager.addJob(start_date.year, start_date.month, start_date.day, 0, 0, 0, PULL_INDICATOR_JOB, source_name)
+        job_manager.addJob(start_date, PULL_SOURCE_JOB, source_name)
+        job_manager.update_commit_schedule()
         feedback_color = 'lime'
     return html.Div(feedback_message, style={'background-color': feedback_color})
 

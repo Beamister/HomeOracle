@@ -263,7 +263,7 @@ def update_graph(dimension_select, xaxis_name, yaxis_name, zaxis_name, rows, sel
         if old_figure['data'][0]['type'] == 'scatter3d':
             camera = old_figure['layout']['scene']['camera']
         else:
-            camera = default_3d_camera
+            camera = DEFAULT_3D_CAMERA
         return {
             'data':
                 [
