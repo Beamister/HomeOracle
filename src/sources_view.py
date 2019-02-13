@@ -4,7 +4,7 @@ import boto3
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-
+from tables import add_column
 from constants import *
 from server import *
 
@@ -240,7 +240,7 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
             start_date = dt.now()
         else:
             start_date = dt.strptime(start_date, '%Y-%m-%d')
-        start_date.replace()
+        start_date.replace(hour=0, minute=0, second=0)
         start_date_string = start_date.strfttime("%d/%m/%Y")
         indicators = {}
         for i in range(indicator_count):
@@ -261,8 +261,11 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
             feedback_message = "Successfully updated source: " + source_name
         else:
             feedback_message = "Successfully added new source: " + source_name
+        for indicator in indicators.keys():
+            add_column(indicator)
+        job_manager.update_indicators_metadata()
+        job_manager.update_commit_schedule(start_date, frequency)
         job_manager.addJob(start_date, PULL_SOURCE_JOB, source_name)
-        job_manager.update_commit_schedule()
         feedback_color = 'lime'
     return html.Div(feedback_message, style={'background-color': feedback_color})
 

@@ -96,7 +96,8 @@ layout = html.Div(
                 )
             ],
             id='inputsContainer',
-            style={'width': '100%', 'display': 'block'}),
+            style={'width': '100%', 'display': 'block'}
+        ),
 
         html.H2('Graph View'),
         dcc.Graph(id='graphView'),
@@ -128,9 +129,9 @@ layout = html.Div(
     [Input('fileSelect', 'value')])
 def update_table(selected_file):
     if not (selected_file in data_store):
-        new_data = pd.read_csv("Data/" + selected_file, sep='\s+')
-        locacl_sorted_headers = sort(data_store[selected_file].columns.tolist())
-        new_data = new_data[locacl_sorted_headers]
+        new_data = pd.read_csv('Data/' + selected_file, sep='\s+')
+        local_sorted_headers = sort(data_store[selected_file].columns.tolist())
+        new_data = new_data[local_sorted_headers]
         data_store[selected_file] = new_data
     return data_store[selected_file].to_dict('records')
 
@@ -243,21 +244,22 @@ def update_graph(dimension_select, xaxis_name, yaxis_name, zaxis_name, rows, sel
                     )
 
                 ],
-            'layout': go.Layout(
-                        height=800,
-                        width=1300,
-                        title="{} Over {}".format(yaxis_name, xaxis_name),
-                        xaxis={
-                            'title': xaxis_name,
-                            'type': 'linear'
-                        },
-                        yaxis={
-                            'title': yaxis_name,
-                            'type': 'linear'
-                        },
-                        margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
-                        hovermode='closest'
-                        )
+            'layout':
+                go.Layout(
+                    height=800,
+                    width=1300,
+                    title="{} Over {}".format(yaxis_name, xaxis_name),
+                    xaxis={
+                        'title': xaxis_name,
+                        'type': 'linear'
+                    },
+                    yaxis={
+                        'title': yaxis_name,
+                        'type': 'linear'
+                    },
+                    margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
+                    hovermode='closest'
+                )
         }
     else:
         if old_figure['data'][0]['type'] == 'scatter3d':
@@ -281,19 +283,20 @@ def update_graph(dimension_select, xaxis_name, yaxis_name, zaxis_name, rows, sel
                         }
                     )
                 ],
-            'layout': go.Layout(
-                        height=800,
-                        width=1300,
-                        title="{} Over {} Over {}".format(yaxis_name, xaxis_name, zaxis_name),
-                        margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
-                        hovermode='closest',
-                        scene=go.Scene(
-                            camera=camera,
-                            xaxis=go.XAxis(title=xaxis_name),
-                            yaxis=go.YAxis(title=yaxis_name),
-                            zaxis=go.ZAxis(title=zaxis_name),
-                        )
-                      )
+            'layout':
+                go.Layout(
+                    height=800,
+                    width=1300,
+                    title="{} Over {} Over {}".format(yaxis_name, xaxis_name, zaxis_name),
+                    margin={'l': 40, 'b': 40, 't': 40, 'r': 40},
+                    hovermode='closest',
+                    scene=go.Scene(
+                        camera=camera,
+                        xaxis=go.XAxis(title=xaxis_name),
+                        yaxis=go.YAxis(title=yaxis_name),
+                        zaxis=go.ZAxis(title=zaxis_name),
+                    )
+                )
         }
 
 
