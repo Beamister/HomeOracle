@@ -1,11 +1,12 @@
-from lru import LRU
+from functools import lru_cache
 from constants import *
 import boto3
 
-class LocationEngine():
+
+class LocationEngine:
 
     def __init__(self, database_engine):
-        self.cache = LRU(LOCATION_ENGINE_CACHE_SIZE)
+        self.cache = lru_cache(LOCATION_ENGINE_CACHE_SIZE)
         dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
         self.tables = {}
         for table_name in GSS_CODE_TABLE_NAMES:

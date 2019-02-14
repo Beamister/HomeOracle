@@ -8,6 +8,12 @@ from constants import *
 Base = declarative_base()
 
 
+def get_class_by_tablename(tablename):
+    for c in Base._decl_class_registry.values():
+        if hasattr(c, '__tablename__') and c.__tablename__ == tablename:
+            return c
+
+
 def get_indicators():
     dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
     sources_table = dynamodb.Table('Sources')

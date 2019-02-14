@@ -29,10 +29,12 @@ class ServerState():
         dump(state_variables, state_file, skipkeys=True)
         state_file.close()
 
+
 # Called on first run of the server to set up tables and such
 def init():
     Base.metadata.create_all(database_engine)
     job_manager.add_job(datetime.datetime.now(), PULL_LAND_REGISTRY_JOB, '')
+
 
 server_state = ServerState()
 

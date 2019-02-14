@@ -4,6 +4,7 @@ lib
 bin
 **lock**
 **__pycache__**
+
 # Elastic Beanstalk Files
 **.elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
@@ -18,3 +19,6 @@ bin
 
 # Data directories
 **Data**
+
+# Jetbrains directory
+.idea

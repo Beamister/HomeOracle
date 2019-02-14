@@ -15,12 +15,18 @@ DEFAULT_3D_CAMERA =  {'up': {'x': 0, 'y': 0, 'z': 1},
                       'center': {'x': 0, 'y': 0, 'z': 0},
                       'eye': {'x': 1, 'y': -2, 'z': 0.25}}
 
-LAND_REGISTRY_URL = 'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv'
+
+LAND_REGISTRY_URL = 'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/' \
+                    'pp-monthly-update-new-version.csv'
 LAND_REGISTRY_TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M'
-LAND_REGISTRY_DATA_HEADERS = ['sale_id', 'price', 'date', 'postcode', 'property_type', 'new_property_flag', 'duration', 'PAON',
-                              'SAON', 'street', 'locality', 'town/city', 'district', 'county', 'PDD_type', 'record_status']
-STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'town/city', 'district', 'county', 'new_property_flag',
-                        'property_type', 'tenure_type', 'record_status']
+LAND_REGISTRY_DATA_HEADERS = ['sale_id', 'price', 'date', 'postcode', 'property_type', 'new_property_flag', 'duration',
+                              'PAON', 'SAON', 'street', 'locality', 'town/city', 'district', 'county', 'PDD_type',
+                              'record_status']
+
+STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'town/city', 'district', 'county',
+                        'new_property_flag', 'property_type', 'record_status']
+
+AWS_REGION = 'eu-west-2'
 
 AWS_REGION = 'eu-west-2'
 
@@ -66,3 +72,5 @@ COMMIT_JOB = 'commit_entries'
 
 LOCATION_ENGINE_CACHE_SIZE = 1024
 GSS_CODE_TABLE_NAMES = []
+
+RDS_VIEW_ROW_COUNT = 100
