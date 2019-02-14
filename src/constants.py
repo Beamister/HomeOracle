@@ -16,14 +16,29 @@ DEFAULT_3D_CAMERA =  {'up': {'x': 0, 'y': 0, 'z': 1},
                       'eye': {'x': 1, 'y': -2, 'z': 0.25}}
 
 LAND_REGISTRY_URL = 'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv'
+LAND_REGISTRY_TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M'
 LAND_REGISTRY_DATA_HEADERS = ['sale_id', 'price', 'date', 'postcode', 'property_type', 'new_property_flag', 'duration', 'PAON',
                               'SAON', 'street', 'locality', 'town/city', 'district', 'county', 'PDD_type', 'record_status']
 STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'town/city', 'district', 'county', 'new_property_flag',
                         'property_type', 'tenure_type', 'record_status']
 
+AWS_REGION = 'eu-west-2'
+
+# Dictionary of gss code table names to files
+GSS_CODE_FILES = {
+                  'counties': 'counties.json', 'county_elctoral_divisions': 'ceds.json', 'districts': 'districts.json',
+                  'wards': 'wards.json', 'countries': 'countries.json', 'regions': 'regions.json',
+                  'parliamentary_constituencies': 'constituencies.json',
+                  'eu_electoral_region': 'european_registers.json', 'nuts_and_lau_areas': 'nuts.json',
+                  'parishes': 'parishes.json', 'primary_care_trusts': 'pcts.json',
+                  'strategic_health_authorities': 'nhsHa.json', 'clinical_commissioning_groups': 'ccgs.json',
+                  'lower_layer_super_output_areas': 'lsoa.json','middle_layer_super_output_areas': 'msoa.json',
+                  'police_force': 'police_force.csv'
+                }
+
 # Number of days to delay staging after sources should be ready, accounts for edge case issues to varying month lengths
 # and delay in pulling sources
-COMMIT_DELAY = 5
+COMMIT_DELAY = 6
 
 # Keep in length descending length order
 FREQUENCY_DAY_COUNTS = {'yearly': 365, 'monthly': 30, 'weekly': 7, 'daily': 1}
@@ -32,7 +47,11 @@ FREQUENCIES = {'yearly': 'Yearly', 'monthly': 'Monthly', 'weekly': 'Weekly', 'da
 AREA_RESOLUTIONS = {'ward' : 'Ward', 'county' : 'County', 'parish' : 'Parish', 'constituency' : 'Constituency',
                     'police' : 'Police Force', 'individual' : 'Individual'}
 
+SERVER_STATE_FILE = 'state.json'
 
+# Number of seconds for managers to wait before polling again after empty result
+JOB_MANAGER_POLL_DELAY = 600
+COMMIT_MANAGER_POLL_DELAY = 3600
 
 BLUE = '#0074D9'
 ORANGE = '#FF851B'
@@ -44,3 +63,6 @@ SECONDS_PER_HOUR = 3600
 PULL_SOURCE_JOB = 'pull_source'
 PULL_LAND_REGISTRY_JOB = 'pull_land_registry'
 COMMIT_JOB = 'commit_entries'
+
+LOCATION_ENGINE_CACHE_SIZE = 1024
+GSS_CODE_TABLE_NAMES = []

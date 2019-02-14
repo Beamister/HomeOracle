@@ -9,6 +9,7 @@ import indicators_view
 import models_view
 import property_view
 import sources_view
+import rds_view
 from server import *
 
 # app.css.append_css({'external_url' : 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
@@ -20,7 +21,8 @@ app.layout = html.Div([
                        dcc.Tab(label='Property View', value='propertyView', className="myTab"),
                        dcc.Tab(label='Models View', value='modelsView', className="myTab"),
                        dcc.Tab(label='Sources View', value='sourcesView', className="myTab"),
-                       dcc.Tab(label='Dynamo View', value='dynamoView', className="myTab")],
+                       dcc.Tab(label='Dynamo View', value='dynamoView', className="myTab"),
+                       dcc.Tab(label='RDS View', value='rdsView', className="myTab")],
              id='tabs',
              value='dataView'),
     html.Div(id='page-content'),
@@ -45,6 +47,8 @@ def display_page(value):
         return indicators_view.layout
     elif value == 'dynamoView':
         return dynamo_view.layout
+    elif value == 'rdsView':
+        return rds_view.layout
     else:
         return 'Welcome to the home page'
 

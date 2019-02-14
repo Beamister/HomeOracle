@@ -9,17 +9,16 @@ from server import *
 dynamodb = boto3.resource('dynamodb', region_name='eu-west-2')
 sources_table = dynamodb.Table('Sources')
 sources_data = sources_table.scan()['Items']
-indicators_table = dynamodb.Table('Indicators')
-indicators = [indicator['IndicatorName'] for indicator in
-              indicators_table.scan(ProjectionExpression='IndicatorName')['Items']]
 
 layout = html.Div(children=[
     dcc.Dropdown(id='dataSetSelect',
                  value='sources',
                  options=[{'label': 'Sources', 'value': 'sources'},
-                          ]),
+                          ]
+    ),
     html.Div(id='outputArea',
-             style={'overflow-y': 'scroll', 'white-space': 'pre', 'height': '40em'})
+             style={'overflow-y': 'scroll', 'white-space': 'pre', 'height': '40em'}
+    )
 ])
 
 

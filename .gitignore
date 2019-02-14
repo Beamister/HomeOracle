@@ -15,3 +15,6 @@ bin
 
 # Database password file
 **databasePassword.txt
+
+# Data directories
+**Data**
