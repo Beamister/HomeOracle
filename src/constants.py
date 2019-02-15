@@ -28,8 +28,6 @@ STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'tow
 
 AWS_REGION = 'eu-west-2'
 
-AWS_REGION = 'eu-west-2'
-
 # Dictionary of gss code table names to files
 GSS_CODE_FILES = {
                   'counties': 'counties.json', 'county_elctoral_divisions': 'ceds.json', 'districts': 'districts.json',

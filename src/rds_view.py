@@ -1,6 +1,6 @@
 from server import app, database_engine
 from sqlalchemy.orm import sessionmaker
-from tables import Base
+from tables import Base, get_class_by_tablename
 from constants import *
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
@@ -45,7 +45,6 @@ layout = html.Div(children=[
 
     dt.DataTable(
         id='table',
-        style={'height': '80rem'},
         row_selectable=True,
         rows=[{}],
         editable=False,
@@ -85,11 +84,15 @@ def update_table_rows(table_name, page_number):
 @app.callback(Output('page_select', 'options'),
               [Input('table_select', 'value')])
 def update_page_select_options(table_name):
+    print('Table selected: ', table_name)
     session = session_maker()
-    row_count = len(session.query(Base.metadata.tables[table_name]).all())
+    class_type = get_class_by_tablename(table_name)
+    row_count = session.query(class_type).count()
     session.close()
     page_count = (row_count // RDS_VIEW_ROW_COUNT) + 1
-    return [{'label': page_number, 'value': page_number} for page_number in range(1, page_count + 1)]
+    options = [{'label': page_number, 'value': page_number} for page_number in range(1, page_count + 1)]
+    print('Options', options)
+    return options
 
 
 # Ensures that when a new table is selected the page select is set to 1

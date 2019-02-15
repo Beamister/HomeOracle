@@ -17,7 +17,7 @@ app.layout = html.Div([
     # dcc.Location(id='url', refresh=False),
     dcc.Tabs(children=[dcc.Tab(label='Home', value='home', className="myTab"),
                        dcc.Tab(label='Data View', value='dataView', className="myTab"),
-                       dcc.Tab(label='Indicators View', value='indicatorsView', className="myTab"),
+                       # dcc.Tab(label='Indicators View', value='indicatorsView', className="myTab"),
                        dcc.Tab(label='Property View', value='propertyView', className="myTab"),
                        dcc.Tab(label='Models View', value='modelsView', className="myTab"),
                        dcc.Tab(label='Sources View', value='sourcesView', className="myTab"),
@@ -43,8 +43,8 @@ def display_page(value):
         return models_view.layout
     elif value == 'sourcesView':
         return sources_view.layout
-    elif value == 'indicatorsView':
-        return indicators_view.layout
+    # elif value == 'indicatorsView':
+    #     return indicators_view.layout
     elif value == 'dynamoView':
         return dynamo_view.layout
     elif value == 'rdsView':

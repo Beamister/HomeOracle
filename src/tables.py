@@ -93,20 +93,20 @@ class IndicatorValue(Base):
 
 class Locations(Base):
     __tablename__ = 'postcode_lookup'
-    postcode = Column(String(10), primary_key=True)  # column name - pcds
-    county = Column(String(9))  # counties.json, column name - cty
-    county_electoral_division = Column(String(9))  # ceds.json, column name - ced
-    district = Column(String(9))  # districts.json, column name - laua
-    ward = Column(String(9))  # wards.json, column name - ward
-    country = Column(String(9))  # countries.json, column name - ctry
-    region = Column(String(9))  # regions.json, column name - rgn
-    parliamentry_constituency = Column(String(9))  # constituencies.json, column name - pcon
-    european_electoral_region = Column(String(9))  # european_registers.json, column name - eer
-    lau2_or_nut_area = Column(String(9))  # nuts.json, column name - nuts
-    # parish = Column(String(9))  # parishes.json, column name - NOT IN LOOKUP DIRECTORY
-    primary_care_trust = Column(String(9))  # pcts.json, column name - pct
-    strategic_health_authority = Column(String(9))  # nhsHa.json, column name - hlthau
-    clinical_commisionaing_group = Column(String(9))  # ccgs.json, column name - ccg
-    lower_layer_super_output_area = Column(String(9))  # lsoa.json, column name - lsoa11
-    middle_layer_super_output_area = Column(String(9))  # msoa.json, column name - msoa11
-    police_force = Column(String(9))  # police_force.csv, column name - pfa
+    pcds = Column(String(10), primary_key=True)  # postcode
+    cty = Column(String(9))  # counties.json, county
+    ced = Column(String(9))  # ceds.json, county electoral division
+    laua = Column(String(9))  # districts.json, district
+    ward = Column(String(9))  # wards.json, ward
+    ctry = Column(String(9))  # countries.json, country
+    rgn = Column(String(9))  # regions.json, region
+    pcon = Column(String(9))  # constituencies.json, parliamentary constituency
+    eer = Column(String(9))  # european_registers.json, european electoral register
+    nuts = Column(String(9))  # nuts.json, lau2 or nut area
+    # parish = Column(String(9))  # parishes.json, NOT IN LOOKUP DIRECTORY
+    pct = Column(String(9))  # pcts.json, primary care trust
+    hlthau = Column(String(9))  # nhsHa.json, strategic health authority
+    ccg = Column(String(9))  # ccgs.json, clinical commissioning group
+    lsoa11 = Column(String(9))  # lsoa.json, lower layer super output area
+    msoa11 = Column(String(9))  # msoa.json, middle layer super output area
+    pfa = Column(String(9))  # police_force.csv, police force area
