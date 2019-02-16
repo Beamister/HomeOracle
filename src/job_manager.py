@@ -92,9 +92,6 @@ def update_entry_from_land_registry(update_entry, existing_entry):
     existing_entry.value = update_entry.value
     existing_entry.PDD_type = update_entry.PDD_type
     existing_entry.postcode = update_entry.postcode
-    existing_entry.town_or_city = update_entry.town_or_city
-    existing_entry.district = update_entry.district
-    existing_entry.county = update_entry.county
     existing_entry.new_property_flag = update_entry.new_property_flag
     existing_entry.property_type = update_entry.property_type
     existing_entry.tenure_type = update_entry.tenure_type
@@ -189,7 +186,7 @@ class JobManager(threading.Thread):
         # Reorder columns
         data_frame = data_frame[STAGED_ENTRY_HEADERS]
         # Convert old or new character value to boolean
-        data_frame['old_or_new'] = data_frame['old_or_new'].map(dict(Y=True, N=False))
+        data_frame['new_property_flag'] = data_frame['new_property_flag'].map(dict(Y=True, N=False))
         current_highest_id = -1
         latest_entry = self.session.query(StagedEntry).order_by(desc(StagedEntry.entry_id)).first()
         if latest_entry is not None:

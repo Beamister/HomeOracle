@@ -23,8 +23,7 @@ LAND_REGISTRY_DATA_HEADERS = ['sale_id', 'price', 'date', 'postcode', 'property_
                               'PAON', 'SAON', 'street', 'locality', 'town/city', 'district', 'county', 'PDD_type',
                               'record_status']
 
-STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'town/city', 'district', 'county',
-                        'new_property_flag', 'property_type', 'record_status']
+STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'new_property_flag', 'property_type', 'record_status']
 
 AWS_REGION = 'eu-west-2'
 

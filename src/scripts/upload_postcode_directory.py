@@ -14,4 +14,6 @@ database_engine = create_engine(
                     "mysql://luke:" +
                     database_password +
                     "@third-year-project.cz8muheslaeo.eu-west-2.rds.amazonaws.com:3306/third_year_project")
-data_frame.to_sql('table', database_engine, if_exists='replace', index=False)
+
+print("Uploading data")
+data_frame.to_sql('postcode_lookup', database_engine, if_exists='replace', index=False)
