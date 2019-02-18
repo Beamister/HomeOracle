@@ -195,7 +195,7 @@ class JobManager(threading.Thread):
         batch_end_id = batch_start_id + len(data_frame)
         # Add id column
         data_frame.insert(0, 'entry_id', range(batch_start_id, batch_end_id))
-        data_frame.to_sql('staged_entries', conn=self.database_engine, if_exists='append', index=False)
+        data_frame.to_sql('staged_entries', con=self.database_engine, if_exists='append', index=False)
         # Process deletion entries
         deletion_entries = self.session.query(StagedEntry).filter(StagedEntry.record_type == 'D')
         for deletion_entry in deletion_entries:

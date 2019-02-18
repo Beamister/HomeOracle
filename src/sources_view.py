@@ -94,11 +94,11 @@ layout = html.Div(children=[
                                        ]),
                               html.Div("Select update frequency:"),
                               dcc.Dropdown(id='frequencySelect',
-                                           options=[{'label' : FREQUENCIES[value], 'value' : value}
+                                           options=[{'label': FREQUENCIES[value], 'value': value}
                                                     for value in FREQUENCIES]),
                               html.Div("Select location resolution:"),
                               dcc.Dropdown(id='resolutionSelect',
-                                           options=[{'label' : AREA_RESOLUTIONS[value], 'value' : value}
+                                           options=[{'label': AREA_RESOLUTIONS[value], 'value': value}
                                                     for value in AREA_RESOLUTIONS]),
                               html.Div("Select number of indicators:"),
                               html.Div(id='indicatorCountContainer',
