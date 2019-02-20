@@ -88,6 +88,8 @@ class IndicatorValue(Base):
 class Locations(Base):
     __tablename__ = 'postcode_lookup'
     pcds = Column(String(10), primary_key=True)  # postcode
+    lat = Column(Float)  # latitude
+    long = Column(Float)  # longitude
     cty = Column(String(9))  # counties.json, county
     ced = Column(String(9))  # ceds.json, county electoral division
     laua = Column(String(9))  # districts.json, district

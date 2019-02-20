@@ -15,6 +15,10 @@ layout = html.Div(children=[
                  sortable=True,
                  selected_row_indices=[]
                  ),
-    dcc.Button("Delete",
-               id='delete_button'),
+    html.Button("Delete",
+                id='delete_button'
+                ),
+    html.Button("Retrain",
+                id='retrain_button'
+                )
 ])

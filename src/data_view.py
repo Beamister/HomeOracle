@@ -201,7 +201,7 @@ def highlight_click_data_points_in_table(click_data, selected_indices):
 
 @app.callback(
     Output('graphView', 'figure'),
-    [Input('dimension_select', 'value'),
+    [Input('dimensionSelect', 'value'),
      Input('XAxisSelect', 'value'),
      Input('YAxisSelect', 'value'),
      Input('ZAxisSelect', 'value'),
@@ -237,8 +237,8 @@ def update_graph(dimension_select, xaxis_name, yaxis_name, zaxis_name, rows, sel
                     go.Scattergl(
                         name='Regression Line',
                         x=[data_frame[xaxis_name].min(), data_frame[xaxis_name].max()],
-                        y=[linear_model.predict(data_frame[xaxis_name].min())[0][0],
-                           linear_model.predict(data_frame[xaxis_name].max())[0][0]],
+                        y=[linear_model.predict([[data_frame[xaxis_name].min()]])[0][0],
+                           linear_model.predict([[data_frame[xaxis_name].max()]])[0][0]],
                         mode='line',
                         line={'color': 'black', 'width': 5}
                     )

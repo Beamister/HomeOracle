@@ -71,9 +71,14 @@ layout = html.Div(children=[
                           ])
              ]
              ),
+    html.Div("Select Dataset"),
+    dcc.Dropdown(id='dataset_select',
+                 options=[{'label': 'Boston Housing', 'value': 'boston_housing'},
+                          {'label': 'Core Dataset', 'value': 'core_dataset'}],
+                 value=''
+                 ),
     dcc.Checklist(id='enable_use_entire_dataset',
-                  options=[{'label': 'Use entire dataset',
-                            'value': 'enable_use_entire_dataset'}],
+                  options=[{'label': 'Use entire dataset', 'value': 'enable_use_entire_dataset'}],
                   values=[]
                   ),
     html.Div("Maximum number of entries to train on:"),

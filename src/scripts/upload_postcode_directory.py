@@ -2,7 +2,7 @@ import pandas
 from sqlalchemy import create_engine
 
 directory_file = open('Data/Postcode_Directory_Documents/Data/Postcode_Directory_Single.csv')
-columns = ['pcds', 'cty', 'ced', 'laua', 'ward', 'ctry', 'rgn', 'pcon', 'eer', 'nuts', 'pct', 'hlthau', 'ccg', 'lsoa11',
+columns = ['pcds', 'lat', 'long', 'cty', 'ced', 'laua', 'ward', 'ctry', 'rgn', 'pcon', 'eer', 'nuts', 'pct', 'hlthau', 'ccg', 'lsoa11',
            'msoa11', 'pfa']
 
 data_frame = pandas.read_csv(directory_file, usecols=columns)[columns]

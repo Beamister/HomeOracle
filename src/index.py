@@ -24,7 +24,7 @@ app.layout = html.Div([
                        dcc.Tab(label='Dynamo Viewer', value='dynamoView', className="myTab"),
                        dcc.Tab(label='RDS Viewer', value='rdsView', className="myTab")],
              id='tabs',
-             value='dataView'),
+             value='home'),
     html.Div(id='page-content'),
     # Hidden table required due to Dash design flaw, ensures table module is loaded
     html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}),
