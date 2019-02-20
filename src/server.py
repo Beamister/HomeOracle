@@ -57,7 +57,10 @@ Base.metadata.bind = database_engine
 Table('dataset', Base.metadata, autoload=True, autoload_with=database_engine, keep_existing=False)
 
 job_manager = JobManager(1, 'JobsManagerThread', 1, database_engine)
-job_manager.start()
+
+# switch to enable just the front end for debugging purposes
+if '-f' not in sys.argv:
+    job_manager.start()
 
 if '-i' in sys.argv:
     init()
