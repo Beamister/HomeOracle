@@ -2,13 +2,13 @@ import dash
 from sqlalchemy import create_engine, Table
 from tables import Base
 from job_manager import JobManager
-from commit_manager import CommitManager
 from constants import *
 from json import load, dump
 import sys
 import datetime
 
-class ServerState():
+
+class ServerState:
 
     def __init__(self):
         try:
@@ -16,12 +16,17 @@ class ServerState():
             state = load(state_file)
             state_file.close()
             for state_variable in state:
+                # noinspection PyCallByClass
+                # ensures that attributes are set without calling class set attribute which intercepts changes
                 super.__setattr__(self, state_variable, state[state_variable])
-        except(FileNotFoundError):
+        except FileNotFoundError:
             # Set default values
             pass
 
+    # Intercepts changes to server state and records them to file
     def __setattr__(self, key, value):
+        # noinspection PyCallByClass
+        # used to ensure that attribute gets set as normal
         super.__setattr__(self, key, value)
         state_variables = {key: value for key, value in self.__dict__.items()
                            if not key.startswith('__') and not callable(key)}

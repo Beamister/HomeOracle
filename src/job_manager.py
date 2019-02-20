@@ -86,6 +86,7 @@ def pull_source_data(url, indicator_columns, location_column_index):
         result.append(new_frame)
     return result
 
+
 # Called to update data entries when the land registry returns update records
 def update_entry_from_land_registry(update_entry, existing_entry):
     existing_entry.date = update_entry.date
