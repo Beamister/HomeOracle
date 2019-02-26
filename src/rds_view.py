@@ -84,7 +84,6 @@ def update_table_rows(table_name, page_number):
 @app.callback(Output('page_select', 'options'),
               [Input('table_select', 'value')])
 def update_page_select_options(table_name):
-    print('Table selected: ', table_name)
     session = session_maker()
     class_type = get_class_by_tablename(table_name)
     row_count = session.query(class_type).count()

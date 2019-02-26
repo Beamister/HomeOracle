@@ -35,7 +35,7 @@ for index in range(MAX_SOURCE_COLUMN_COUNT):
 
 layout = html.Div(children=[
     html.H4("Source Input"),
-    html.Div(id='feedbackContainer'),
+    html.Div(id='sources_view_feedback_container'),
     html.Div(id='inputsContainer',
              style={'display': 'flex', 'justify-content': 'space-around'},
              children=[
@@ -128,7 +128,7 @@ def update_calendar_display(start_option):
         return {'display': 'block'}
 
 
-def create_update_input_display_funtion(indicator_index):
+def create_update_input_display_function(indicator_index):
     def update_container_display(indicator_count):
         if indicator_index < indicator_count:
             return {'display': 'block'}
@@ -138,7 +138,7 @@ def create_update_input_display_funtion(indicator_index):
 
 
 for index in range(MAX_SOURCE_COLUMN_COUNT):
-    update_function = create_update_input_display_funtion(index)
+    update_function = create_update_input_display_function(index)
     app.callback(Output('indicatorContainer-' + str(index), 'style'),
                  [Input('indicatorCountSelect', 'value')])(update_function)
 
@@ -213,7 +213,7 @@ def process_url_input(url_input_string):
     return tokens
 
 
-@app.callback(Output('feedbackContainer', 'children'),
+@app.callback(Output('sources_view_feedback_container', 'children'),
               [Input('addSourceButton', 'n_clicks')],
               [State('sourceNameInput', 'value'),
                State('sourceURLInput', 'value'),
@@ -230,7 +230,7 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
     # Catch for when callback is called on page load
     if number_of_clicks is None:
         return ""
-    feedback_color = 'red'
+    feedback_colour = 'red'
     validation_result = validate_input(source_name, source_url, start_date, location_column_index, frequency,
                                        indicator_count, resolution, start_option, indicator_names_and_columns)
     if validation_result != "":
@@ -266,8 +266,8 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
         job_manager.update_indicators_metadata()
         job_manager.update_commit_schedule(start_date, frequency)
         job_manager.addJob(start_date, PULL_SOURCE_JOB, source_name)
-        feedback_color = 'lime'
-    return html.Div(feedback_message, style={'background-color': feedback_color})
+        feedback_colour = 'lime'
+    return html.Div(feedback_message, style={'background-color': feedback_colour})
 
 
 @app.callback(Output('indicatorCountlabel', 'children'),

@@ -3,12 +3,10 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 from server import *
 
-parameter_names = ['test param one', 'test param two']
-existing_model_names = ['test model one', 'test model two']
 
 layout = html.Div(children=[
     html.H1("Model Creator"),
-    html.Div(id='feedback_container'),
+    html.Div(id='model_editor_feedback_container'),
     html.Div(id='inputsContainer',
              style={'display': 'flex', 'justify-content': 'space-around', 'height': '30em'},
              children=[
@@ -29,7 +27,7 @@ layout = html.Div(children=[
                             html.Div(id='model_type_specific_options_container',
                                      children=[
                                         html.Div(id='decision_tree_options_container',
-                                                 style={'display': 'none'},
+                                                 style={'display': 'block'},
                                                  children=[
                                                      html.Div("Number of estimators:"),
                                                      dcc.Input(id='estimator_count_input',
@@ -51,7 +49,7 @@ layout = html.Div(children=[
                                                               ]),
                                                  ]),
                                         html.Div(id='svm_options_container',
-                                                 style={'display': 'none'},
+                                                 style={'display': 'block'},
                                                  children=[
                                                      html.Div("Kernel Type:"),
                                                      dcc.Dropdown(id='kernel_type_select',
@@ -117,15 +115,13 @@ layout = html.Div(children=[
                                          ),
                             html.Div("Select input parameters:"),
                             dcc.Checklist(id='parameter_select',
-                                          options=[{'label': parameter_name, 'value': parameter_name}
-                                                   for parameter_name in parameter_names],
+                                          options=[{}],
                                           values=[],
                                           labelStyle={'display': 'inline-block'}
                                           ),
                             html.Div("Select input models:"),
                             dcc.Checklist(id='composite_model_select',
-                                          options=[{'label': model_name, 'value': model_name}
-                                                   for model_name in existing_model_names],
+                                          options=[{}],
                                           values=[],
                                           labelStyle={'display': 'inline-block'}
                                           ),
@@ -138,16 +134,91 @@ layout = html.Div(children=[
 ])
 
 
-@app.callback(Output('feedback_container', 'children'),
+def validate_model_input(model_name, model_type, estimator_count, enable_max_tree_depth, max_tree_depth, kernel_type,
+                 polynomial_degree, c_value, epsilon_value, dataset, enable_use_entire_dataset, training_examples_count,
+                 inflation_adjustment_type, input_parameters, input_models):
+    result = ""
+    if model_name != "":
+        result = "Please input model name"
+    elif model_name in model_manager.get_model_names():
+        result = "Model name already exists"
+    elif dataset is None:
+        result = "Please select a dataset"
+    elif enable_use_entire_dataset != 'enable_use_entire_dataset' and (training_examples_count is None
+                                                                       or training_examples_count <= 0):
+        result = "Please select number of training examples"
+    elif inflation_adjustment_type is None:
+        result = "Please select inflation adjustment"
+    elif input_parameters == [] and input_models == []:
+        result = "Please select inputs"
+    elif model_type == 'decision_tree':
+        if estimator_count is None or estimator_count <= 0:
+            result = "Please select the number of estimators"
+        elif enable_max_tree_depth == 'enabled_max_tree_depth' and (max_tree_depth is None or max_tree_depth <= 0):
+            result = "Please set max tree depth"
+    elif model_type == 'svm':
+        if kernel_type is None or kernel_type not in ['rbf', 'linear', 'polynomial', 'sigmoid']:
+            result = "Please select kernel type"
+        elif kernel_type == 'polynomial' and (polynomial_degree is None or polynomial_degree <= 0):
+            result = "Please select valid kernel type"
+        elif c_value is None:
+            result = "Please select C value"
+        elif epsilon_value is None:
+            result = "Please select epsilon value"
+    else:
+        result = "Please select a model type"
+    return result
+
+@app.callback(Output('model_editor_feedback_container', 'children'),
               [Input('create_model_button', 'n_clicks')],
               [State('model_name_input', 'value'),
+               State('model_type_select', 'value'),
+               State('estimator_count_input', 'value'),
+               State('enable_max_tree_depth_checkbox', 'value'),
+               State('max_tree_depth_input', 'value'),
+               State('kernel_type_select', 'value'),
+               State('polynomial_degree_input', 'value'),
+               State('c_value_input', 'value'),
+               State('epsilon_value_input', 'value'),
+               State('dataset_select', 'value'),
+               State('enable_use_entire_dataset', 'value'),
+               State('training_examples_count_input', 'value'),
                State('inflation_adjustment_select', 'value'),
-               State('parameter_select', 'value'),
-               State('composite_model_select', 'value')])
-def create_model(n_clicks, model_name, inflation_adjustment_type, input_parameters, input_models):
+               State('parameter_select', 'values'),
+               State('composite_model_select', 'values')])
+def create_model(n_clicks, model_name, model_type, estimator_count, enable_max_tree_depth, max_tree_depth, kernel_type,
+                 polynomial_degree, c_value, epsilon_value, dataset, enable_use_entire_dataset, training_examples_count,
+                 inflation_adjustment_type, input_parameters, input_models):
     # Catch for when callback is called on page load
     if n_clicks is None:
         return ""
+    validation_result = validate_model_input(model_name, model_type, estimator_count, enable_max_tree_depth,
+                                             max_tree_depth, kernel_type, polynomial_degree, c_value, epsilon_value,
+                                             dataset, enable_use_entire_dataset, training_examples_count,
+                                             inflation_adjustment_type, input_parameters, input_models)
+    if validation_result != "":
+        feedback_colour = 'red'
+        feedback_message = validation_result
+    else:
+        settings = {'name': model_name, 'type': model_type, 'dataset': dataset, 'input_parameters': input_parameters,
+                    'input_models': input_models}
+        if model_type == 'decision_tree':
+            settings['estimator_count': estimator_count]
+            if enable_max_tree_depth != 'enabled_max_tree_depth':
+                settings['max_tree_depth'] = None
+            else:
+                settings['max_tree_depth'] = max_tree_depth
+        elif model_type == 'svm':
+            settings['kernel_type': kernel_type]
+            if kernel_type == 'polynomial':
+                settings['polynomial_degree': polynomial_degree]
+            settings['c_value '] = c_value
+            settings['epsilon_value'] = epsilon_value
+            model_manager.add_new_model(settings)
+        feedback_colour = 'lime'
+        feedback_message = "Model successfully created"
+    return html.Div(feedback_message, style={'background-color': feedback_colour})
+
 
 
 @app.callback(Output('max_tree_depth_input_container', 'style'),
@@ -177,15 +248,6 @@ def update_training_count_select_display(selected_options):
         return {'display': 'none'}
 
 
-@app.callback(Output('svm_options_container', 'style'),
-              [Input('model_type_select', 'value')])
-def update_svm_options_display(model_selected):
-    if model_selected == 'svm':
-        return {'display': 'block'}
-    else:
-        return {'display': 'none'}
-
-
 @app.callback(Output('decision_tree_options_container', 'style'),
               [Input('model_type_select', 'value')])
 def update_svm_options_display(model_selected):
@@ -193,3 +255,18 @@ def update_svm_options_display(model_selected):
         return {'display': 'block'}
     else:
         return {'display': 'none'}
+
+
+@app.callback(Output('composite_model_select', 'options'),
+              [Input('create_model_button', 'n_clicks'),
+               Input('dataset_select', 'value')])
+def update_available_input_models(n_clicks, dataset_name):
+    return [{'label': model_name, 'value': model_name}
+            for model_name in model_manager.get_model_names(dataset_name=dataset_name)]
+
+
+@app.callback(Output('parameter_select', 'options'),
+              [Input('dataset_select', 'value')])
+def update_available_input_parameters(dataset_name):
+    return [{'label': parameter_name, 'value': parameter_name}
+            for parameter_name in model_manager.get_available_inputs(dataset_name)]

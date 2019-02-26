@@ -1,5 +1,7 @@
 import dash
 from sqlalchemy import create_engine, Table
+
+from model_manager import ModelManager
 from tables import Base
 from job_manager import JobManager
 from constants import *
@@ -64,6 +66,8 @@ if '-f' not in sys.argv:
 
 if '-i' in sys.argv:
     init()
+
+model_manager = ModelManager()
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
