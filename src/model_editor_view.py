@@ -205,15 +205,15 @@ def create_model(n_clicks, model_name, model_type, estimator_count, enable_max_t
         settings = {'name': model_name, 'type': model_type, 'dataset': dataset, 'input_parameters': input_parameters,
                     'input_models': input_models}
         if model_type == 'decision_tree':
-            settings['estimator_count': estimator_count]
+            settings['estimator_count'] = estimator_count
             if enable_max_tree_depth != 'enabled_max_tree_depth':
                 settings['max_tree_depth'] = None
             else:
                 settings['max_tree_depth'] = max_tree_depth
         elif model_type == 'svm':
-            settings['kernel_type': kernel_type]
+            settings['kernel_type'] = kernel_type
             if kernel_type == 'polynomial':
-                settings['polynomial_degree': polynomial_degree]
+                settings['polynomial_degree'] = polynomial_degree
             settings['c_value '] = c_value
             settings['epsilon_value'] = epsilon_value
             model_manager.add_new_model(settings)

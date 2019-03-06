@@ -212,10 +212,10 @@ for input_index in range(model_manager.get_max_model_inputs()):
               [Input('predict_button', 'n_clicks')],
               [State('predictor_model_select', 'value'),
                State('current_price_input', 'value')]
-               + [State('start_parameter_input-' + str(input_index), 'value')
-                  for input_index in range(model_manager.get_max_model_inputs())]
-               + [State('end_parameter_input-' + str(input_index), 'value')
-                  for input_index in range(model_manager.get_max_model_inputs())])
+              + [State('start_parameter_input-' + str(input_index), 'value')
+                 for input_index in range(model_manager.get_max_model_inputs())]
+              + [State('end_parameter_input-' + str(input_index), 'value')
+                 for input_index in range(model_manager.get_max_model_inputs())])
 def update_prediction(n_clicks, model_name, current_price, *parameter_inputs):
     # Catch for call on page load
     if n_clicks is None:
@@ -228,5 +228,5 @@ def update_prediction(n_clicks, model_name, current_price, *parameter_inputs):
     if current_price is None or None in start_parameter_inputs or None in end_parameter_inputs:
         return "Invalid input"
     predicted_price = model_manager.get_prediction(model_name, current_price,
-                                                    start_parameter_inputs, end_parameter_inputs)
+                                                   start_parameter_inputs, end_parameter_inputs)
     return "Predicted Price: " + str(predicted_price)

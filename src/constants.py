@@ -7,6 +7,7 @@ DEFAULT_DATA_PATH = os.path.join(DATA_DIRECTORY_PATH, DEFAULT_DATA_FILE)
 DEFAULT_DATA_HEADERS = ['Crime', 'Residential', 'Industrial', 'River Boundary', 'Nitric Oxide',
                         'Rooms', 'Pre 1940', 'Employment distance', 'Accessibility', 'Tax',
                         'Education', 'Black Population', 'Lower Status', 'Median Value']
+DEFAULT_TARGET_HEADER = 'Median Value'
 
 SUMMARY_ATTRIBUTES = ['Count', 'Mean', 'STD', 'Min', '25%', '50%', '75%', 'Max']
 
@@ -28,6 +29,7 @@ STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'new
 
 CORE_METADATA_HEADERS = ['entry_id', 'sale_id', 'date', 'value', 'PDD_type', 'postcode', 'new_property_flag',
                          'property_type', 'tenure_type']
+CORE_TARGET_HEADER = 'price'
 
 AWS_REGION = 'eu-west-2'
 

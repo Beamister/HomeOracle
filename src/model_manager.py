@@ -65,10 +65,10 @@ class ModelManager:
 
     def get_recursive_prediction(self, model_name, start_price, start_inputs, end_inputs):
         model = self.models[model_name]
-        parent_predictions = []
+        parent_predictions = {}
         for parent_model in model.input_models:
-            parent_predictions.append(self.get_recursive_prediction(parent_model, start_price,
-                                                                    start_inputs, end_inputs))
+            parent_predictions[parent_model] = self.get_recursive_prediction(parent_model, start_price,
+                                                                             start_inputs, end_inputs)
         prediction = model.predict(start_price, start_inputs, end_inputs, parent_predictions)
         return prediction
 
@@ -77,7 +77,7 @@ class ModelManager:
         start_input_dictionary = dict(zip(input_parameter_names, start_inputs))
         end_input_dictionary = dict(zip(input_parameter_names, end_inputs))
         return self.get_recursive_prediction(model_name, start_price,
-                                             start_input_dictionary, end_input_dictionary)['final_price']
+                                             start_input_dictionary, end_input_dictionary)['final']
 
     # returns the list of input parameters, including those from input models, without duplicates
     def get_model_inputs(self, model_name):
