@@ -3,39 +3,10 @@ import dash_core_components as dcc
 import plotly.offline as plotly
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
+from tables import Locations
+from sqlalchemy.orm import sessionmaker
 from server import *
 from constants import *
-
-
-set_model_callbacks = []
-
-map_data = [
-    go.Scattermapbox(
-        lat=['57.101473'],
-        lon=['-2.242851'],
-        mode='markers',
-        marker=dict(
-            size=14
-        ),
-        text=['Montreal'],
-    )
-]
-
-map_layout = go.Layout(
-    autosize=True,
-    hovermode='closest',
-    margin={'l': 0, 'r': 5, 't': 0, 'b': 0},
-    mapbox=dict(
-        accesstoken=MAPBOX_ACCESS_TOKEN,
-        bearing=0,
-        center=dict(
-            lat=57.101473,
-            lon=-2.242851
-        ),
-        pitch=0,
-        zoom=8
-    ),
-)
 
 
 parameter_input_containers = []
@@ -62,6 +33,31 @@ for input_index in range(model_manager.get_max_model_inputs()):
                                  ])
         parameter_input_containers.append(new_container)
 
+map_data = [
+        go.Scattermapbox(
+            lat=[str(DEFAULT_MAP_LATITUDE)],
+            lon=[str(DEFAULT_MAP_LONGITUDE)],
+            mode='markers',
+            marker=dict(
+                size=14
+            )
+        )
+    ]
+map_layout = go.Layout(
+    autosize=True,
+    hovermode='closest',
+    margin={'l': 0, 'r': 5, 't': 0, 'b': 0},
+    mapbox=dict(
+        accesstoken=MAPBOX_ACCESS_TOKEN,
+        bearing=0,
+        center=dict(
+            lat=DEFAULT_MAP_LATITUDE,
+            lon=DEFAULT_MAP_LONGITUDE
+        ),
+        pitch=0,
+        zoom=8
+    ),
+)
 
 layout = html.Div(children=[
     html.H1("Property Value Predictor"),
@@ -73,7 +69,7 @@ layout = html.Div(children=[
                           style={'display': 'flex-box', 'width': '48%', 'height': '15em'},
                           figure=go.Figure(data=map_data,
                                            layout=map_layout
-                                           ),
+                                           )
                           ),
                 html.Div(id='top_right_container',
                          style={'display': 'flex-box', 'width': '48%'},
@@ -121,6 +117,63 @@ layout = html.Div(children=[
 ])
 
 
+def get_lat_and_long(postcode):
+    session_maker = sessionmaker(bind=database_engine)
+    session = session_maker()
+    postcode_record = session.query(Locations).filter(Locations.pcds==postcode).first()
+    if postcode_record is not None:
+        return postcode_record.lat, postcode_record.long
+    else:
+        return None, None
+
+
+@app.callback(Output('map_container', 'figure'),
+              [Input('auto_fill_button', 'n_clicks')],
+              [State('postcode_input', 'value')])
+def update_map(n_clicks, postcode):
+    if n_clicks is None:
+        latitude = DEFAULT_MAP_LATITUDE
+        longitude = DEFAULT_MAP_LONGITUDE
+    else:
+        postcode_conversion_result = get_lat_and_long(postcode)
+        if postcode_conversion_result is not None:
+            latitude = postcode_conversion_result[0]
+            longitude = postcode_conversion_result[1]
+        else:
+            latitude = DEFAULT_MAP_LATITUDE
+            longitude = DEFAULT_MAP_LONGITUDE
+    map_data = [
+        go.Scattermapbox(
+            lat=[str(latitude)],
+            lon=[str(longitude)],
+            mode='markers',
+            marker=dict(
+                size=14
+            ),
+            text=[postcode],
+        )
+    ]
+    map_layout = go.Layout(
+        autosize=True,
+        hovermode='closest',
+        margin={'l': 0, 'r': 5, 't': 0, 'b': 0},
+        mapbox=dict(
+            accesstoken=MAPBOX_ACCESS_TOKEN,
+            bearing=0,
+            center=dict(
+                lat=latitude,
+                lon=longitude
+            ),
+            pitch=0,
+            zoom=8
+        ),
+    )
+    figure = go.Figure(data=map_data,
+                       layout=map_layout
+                       )
+    return figure
+
+
 def create_update_input_display_function(id_number):
     def update_container_display(model_name):
         if id_number < len(model_manager.get_model_inputs(model_name)):
@@ -142,7 +195,7 @@ def create_update_input_text_function(id_number, base_text):
         if id_number < len(model_inputs):
             return base_text + model_inputs[id_number] + ":"
         else:
-            return "test"
+            return ""
     return update_input_text
 
 
@@ -174,6 +227,6 @@ def update_prediction(n_clicks, model_name, current_price, *parameter_inputs):
     # Check for invalid input
     if current_price is None or None in start_parameter_inputs or None in end_parameter_inputs:
         return "Invalid input"
-    predicted_price  = model_manager.get_prediction(model_name, current_price,
+    predicted_price = model_manager.get_prediction(model_name, current_price,
                                                     start_parameter_inputs, end_parameter_inputs)
     return "Predicted Price: " + str(predicted_price)

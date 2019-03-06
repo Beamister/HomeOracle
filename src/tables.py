@@ -106,3 +106,17 @@ class Locations(Base):
     lsoa11 = Column(String(9))  # lsoa.json, lower layer super output area
     msoa11 = Column(String(9))  # msoa.json, middle layer super output area
     pfa = Column(String(9))  # police_force.csv, police force area
+
+
+class Model(Base):
+    __tablename__ = 'models'
+    name = Column(String(64), primary_key=True)
+    type = Column(String(32))
+    dataset = Column(String(32))
+    state = Column(String(32))
+
+
+class Dependency(Base):
+    __tablename__ = 'model_dependencies'
+    parent = Column(String(64), primary_key=True)
+    child = Column(String(64), primary_key=True)

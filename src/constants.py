@@ -11,9 +11,9 @@ DEFAULT_DATA_HEADERS = ['Crime', 'Residential', 'Industrial', 'River Boundary', 
 SUMMARY_ATTRIBUTES = ['Count', 'Mean', 'STD', 'Min', '25%', '50%', '75%', 'Max']
 
 
-DEFAULT_3D_CAMERA =  {'up': {'x': 0, 'y': 0, 'z': 1},
-                      'center': {'x': 0, 'y': 0, 'z': 0},
-                      'eye': {'x': 1, 'y': -2, 'z': 0.25}}
+DEFAULT_3D_CAMERA = {'up': {'x': 0, 'y': 0, 'z': 1},
+                     'center': {'x': 0, 'y': 0, 'z': 0},
+                     'eye': {'x': 1, 'y': -2, 'z': 0.25}}
 
 
 LAND_REGISTRY_URL = 'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/' \
@@ -23,21 +23,33 @@ LAND_REGISTRY_DATA_HEADERS = ['sale_id', 'price', 'date', 'postcode', 'property_
                               'PAON', 'SAON', 'street', 'locality', 'town/city', 'district', 'county', 'PDD_type',
                               'record_status']
 
-STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'new_property_flag', 'property_type', 'record_status']
+STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'new_property_flag', 'property_type',
+                        'record_status']
+
+CORE_METADATA_HEADERS = ['entry_id', 'sale_id', 'date', 'value', 'PDD_type', 'postcode', 'new_property_flag',
+                         'property_type', 'tenure_type']
 
 AWS_REGION = 'eu-west-2'
 
 # Dictionary of gss code table names to files
 GSS_CODE_FILES = {
-                  'counties': 'counties.json', 'county_elctoral_divisions': 'ceds.json', 'districts': 'districts.json',
-                  'wards': 'wards.json', 'countries': 'countries.json', 'regions': 'regions.json',
-                  'parliamentary_constituencies': 'constituencies.json',
-                  'eu_electoral_region': 'european_registers.json', 'nuts_and_lau_areas': 'nuts.json',
-                  'parishes': 'parishes.json', 'primary_care_trusts': 'pcts.json',
-                  'strategic_health_authorities': 'nhsHa.json', 'clinical_commissioning_groups': 'ccgs.json',
-                  'lower_layer_super_output_areas': 'lsoa.json','middle_layer_super_output_areas': 'msoa.json',
-                  'police_force': 'police_force.csv'
-                }
+    'counties': 'counties.json',
+    'county_electoral_divisions': 'ceds.json',
+    'districts': 'districts.json',
+    'wards': 'wards.json',
+    'countries': 'countries.json',
+    'regions': 'regions.json',
+    'parliamentary_constituencies': 'constituencies.json',
+    'eu_electoral_region': 'european_registers.json',
+    'nuts_and_lau_areas': 'nuts.json',
+    'parishes': 'parishes.json',
+    'primary_care_trusts': 'pcts.json',
+    'strategic_health_authorities': 'nhsHa.json',
+    'clinical_commissioning_groups': 'ccgs.json',
+    'lower_layer_super_output_areas': 'lsoa.json',
+    'middle_layer_super_output_areas': 'msoa.json',
+    'police_force': 'police_force.csv'
+}
 
 # Number of days to delay staging after sources should be ready, accounts for edge case issues to varying month lengths
 # and delay in pulling sources
@@ -47,10 +59,25 @@ COMMIT_DELAY = 6
 FREQUENCY_DAY_COUNTS = {'yearly': 365, 'monthly': 30, 'weekly': 7, 'daily': 1}
 # Dictionaries of names to view labels
 FREQUENCIES = {'yearly': 'Yearly', 'monthly': 'Monthly', 'weekly': 'Weekly', 'daily': 'Daily'}
-AREA_RESOLUTIONS = {'ward' : 'Ward', 'county' : 'County', 'parish' : 'Parish', 'constituency' : 'Constituency',
-                    'police' : 'Police Force', 'individual' : 'Individual'}
+
+AREA_RESOLUTIONS = {'ward': 'Ward',
+                    'cty': 'County',
+                    'pcon': 'Constituency',
+                    'ctry': 'Country',
+                    'pfa': 'Police Force',
+                    'european_electoral_register': 'European Electoral Area',
+                    'rgn': 'Region',
+                    'nuts': 'European Statistical Region',
+                    'pct': 'Primary Care Trust',
+                    'hlthau': 'Health Authority',
+                    'ccg': 'Clinical Commissioning Group',
+                    'lsoa11': 'Lower Layer Super Output Area',
+                    'msoa11': 'Middle Layer Super Output Area',
+                    'ced': 'District'}
 
 SERVER_STATE_FILE = 'state.json'
+
+MAX_TRAINING_ENTRIES = 100000
 
 # Number of seconds for managers to wait before polling again after empty result
 JOB_MANAGER_POLL_DELAY = 600
@@ -73,5 +100,7 @@ GSS_CODE_TABLE_NAMES = []
 RDS_VIEW_ROW_COUNT = 100
 
 MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiYmVhbW8iLCJhIjoiY2pzYnF2anVzMDdvcDQ0dGIwMDgxOXJmdSJ9.nchvAXMIixTwZWLcKxic6w'
+DEFAULT_MAP_LATITUDE = 53.467
+DEFAULT_MAP_LONGITUDE = -2.234
 
 MODEL_TABLE_UPDATE_PERIOD = 10 * 1000

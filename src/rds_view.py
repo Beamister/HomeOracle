@@ -90,7 +90,6 @@ def update_page_select_options(table_name):
     session.close()
     page_count = (row_count // RDS_VIEW_ROW_COUNT) + 1
     options = [{'label': page_number, 'value': page_number} for page_number in range(1, page_count + 1)]
-    print('Options', options)
     return options
 
 

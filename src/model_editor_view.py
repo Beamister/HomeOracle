@@ -92,7 +92,8 @@ layout = html.Div(children=[
                             dcc.Dropdown(id='dataset_select',
                                          options=[{'label': 'Boston Housing', 'value': 'boston_housing'},
                                                   {'label': 'Core Dataset', 'value': 'core_dataset'}],
-                                         value=''
+                                         value='core_dataset',
+                                         clearable=False
                                          ),
                             dcc.Checklist(id='enable_use_entire_dataset',
                                           options=[{'label': 'Use entire dataset',
@@ -169,6 +170,7 @@ def validate_model_input(model_name, model_type, estimator_count, enable_max_tre
         result = "Please select a model type"
     return result
 
+
 @app.callback(Output('model_editor_feedback_container', 'children'),
               [Input('create_model_button', 'n_clicks')],
               [State('model_name_input', 'value'),
@@ -220,7 +222,6 @@ def create_model(n_clicks, model_name, model_type, estimator_count, enable_max_t
     return html.Div(feedback_message, style={'background-color': feedback_colour})
 
 
-
 @app.callback(Output('max_tree_depth_input_container', 'style'),
               [Input('enable_max_tree_depth_checkbox', 'values')])
 def update_max_tree_depth_input_display(selected_options):
@@ -250,8 +251,17 @@ def update_training_count_select_display(selected_options):
 
 @app.callback(Output('decision_tree_options_container', 'style'),
               [Input('model_type_select', 'value')])
-def update_svm_options_display(model_selected):
+def update_decision_tree_options_display(model_selected):
     if model_selected == 'decision_tree':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(Output('svm_options_container', 'style'),
+              [Input('model_type_select', 'value')])
+def update_svm_options_display(model_selected):
+    if model_selected == 'svm':
         return {'display': 'block'}
     else:
         return {'display': 'none'}

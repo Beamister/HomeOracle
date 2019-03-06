@@ -22,8 +22,6 @@ layout = html.Div(children=[
 ])
 
 
-
-
 @app.callback(Output('outputArea', 'children'),
               [Input('dataSetSelect', 'value')])
 def update_output_area(table_name):
