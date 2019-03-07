@@ -1,6 +1,5 @@
 import dash_html_components as html
 import dash_core_components as dcc
-import plotly.offline as plotly
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
 from tables import Locations
@@ -87,8 +86,8 @@ layout = html.Div(children=[
                             dcc.Dropdown(id='predictor_model_select',
                                          clearable=False,
                                          options=[{'label': model_name, 'value': model_name}
-                                                  for model_name in model_manager.get_model_names()],
-                                         value=model_manager.get_model_names()[0]
+                                                  for model_name in model_manager.get_trained_model_names()],
+                                         value=model_manager.get_trained_model_names()[0]
                                          ),
                             html.Div("Current Price:"),
                             dcc.Input(id='current_price_input',
@@ -106,7 +105,7 @@ layout = html.Div(children=[
                             html.Div(id='dummy_predictions_container',
                                      style={'display': 'none'},
                                      children=[html.Div(id='dummy_prediction_' + model_name)
-                                               for model_name in model_manager.get_model_names()]
+                                               for model_name in model_manager.get_trained_model_names()]
                                      ),
                          ])
              ]),

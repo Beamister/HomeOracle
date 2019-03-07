@@ -7,6 +7,7 @@ from model import Model
 import os
 import pickle
 
+
 class ModelManager:
 
     # Dictionary of model names to model objects
@@ -24,12 +25,23 @@ class ModelManager:
             model_input_count = len(self.get_model_inputs(model_name))
             if model_input_count > self.max_inputs:
                 self.max_inputs = model_input_count
+            # Check for models that were in training when last shut down
+            if self.session.query(Model).filter(Model.name == model_name, Model.state == 'training')\
+                    .exists().scalar():
+                self.train_model(model_name)
 
     def get_model_names(self, dataset_name=None):
         if dataset_name is None:
             model_names = self.session.query(Model.name)
         else:
             model_names = self.session.query(Model.name).filter(Model.dataset == dataset_name)
+        return list(model_names)
+
+    def get_trained_model_names(self, dataset_name=None):
+        if dataset_name is None:
+            model_names = self.session.query(Model.name).filter(Model.state == 'trained')
+        else:
+            model_names = self.session.query(Model.name).filter(Model.dataset == dataset_name, Model.state == 'trained')
         return list(model_names)
 
     def get_model_table(self):

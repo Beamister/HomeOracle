@@ -204,6 +204,10 @@ def create_model(n_clicks, model_name, model_type, estimator_count, enable_max_t
     else:
         settings = {'name': model_name, 'type': model_type, 'dataset': dataset, 'input_parameters': input_parameters,
                     'input_models': input_models}
+        if enable_use_entire_dataset == 'enable_use_entire_dataset':
+            settings['max_training_examples'] = MAX_TRAINING_ENTRIES
+        else:
+            settings['max_training_examples'] = training_examples_count
         if model_type == 'decision_tree':
             settings['estimator_count'] = estimator_count
             if enable_max_tree_depth != 'enabled_max_tree_depth':

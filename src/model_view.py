@@ -45,6 +45,7 @@ layout = html.Div(children=[
 def update_model_table(delete_clicks, retrain_clicks, n_intervals):
     return model_manager.get_model_table()
 
+
 @app.callback(Output('delete_button_clicks', 'children'),
               [Input('retrain_button', 'n_clicks')],
               [State('model_table', 'rows'),

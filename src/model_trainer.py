@@ -26,6 +26,9 @@ class ModelTrainer(threading.Thread):
         dataframe[model_name] = model_output
 
     def train_model(self, model_name):
+        model_record = self.session.query(Model).filter(Model.name == model_name).one()
+        model_record.state = 'training'
+        self.session.commit()
         parent_models = self.model_manager.models[model_name].input_models
         for parent_model in parent_models:
             # Train any untrained parent models
@@ -48,6 +51,8 @@ class ModelTrainer(threading.Thread):
             self.recursive_process(parent_model, dataframe)
         model.train()
         self.model_manager.save_model(model_name)
+        model_record.state = 'trained'
+        self.session.commit()
 
     def run(self):
         self.train_model(self.bottom_model_name)
