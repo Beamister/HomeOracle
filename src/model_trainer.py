@@ -1,7 +1,7 @@
 import threading
 from sqlalchemy.orm import sessionmaker, query
 from sqlalchemy.sql.expression import func
-from tables import Model, TargetEntry
+from tables import ModelEntry, TargetEntry
 import time
 import pandas
 from constants import *
@@ -26,17 +26,17 @@ class ModelTrainer(threading.Thread):
         dataframe[model_name] = model_output
 
     def train_model(self, model_name):
-        model_record = self.session.query(Model).filter(Model.name == model_name).one()
+        model_record = self.session.query(ModelEntry).filter(ModelEntry.name == model_name).one()
         model_record.state = 'training'
         self.session.commit()
         parent_models = self.model_manager.models[model_name].input_models
         for parent_model in parent_models:
             # Train any untrained parent models
-            if self.session.query(Model).filter(Model.name == parent_model, Model.state == 'untrained')\
+            if self.session.query(ModelEntry).filter(ModelEntry.name == parent_model, ModelEntry.state == 'untrained')\
                     .exists().scalar():
                 self.train_model(parent_model)
             # Wait for any parent models that are still in training, in cases where another process started the training
-            while self.session.query(Model).filter(Model.name == parent_model, Model.state == 'training')\
+            while self.session.query(ModelEntry).filter(ModelEntry.name == parent_model, ModelEntry.state == 'training')\
                     .exists().scalar():
                 time.sleep(30)
         model = self.model_manager.models[model_name]
@@ -46,10 +46,13 @@ class ModelTrainer(threading.Thread):
             dataframe = pandas.read_sql(query(TargetEntry).order_by(func.rand()).limit(entry_count),
                                         self.database_engine)
         else:
-            dataframe = pandas.read_csv(DEFAULT_DATA_PATH, sep='\s+', names=DEFAULT_DATA_HEADERS).sample(entry_count)
+            dataframe = pandas.read_csv(DEFAULT_DATA_PATH, sep='\s+', names=DEFAULT_DATA_HEADERS)
+            if entry_count > len(dataframe):
+                entry_count = len(dataframe)
+            dataframe = dataframe.sample(entry_count)
         for parent_model in parent_models:
             self.recursive_process(parent_model, dataframe)
-        model.train()
+        model.train(dataframe)
         self.model_manager.save_model(model_name)
         model_record.state = 'trained'
         self.session.commit()

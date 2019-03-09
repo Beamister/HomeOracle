@@ -4,7 +4,7 @@ import boto3
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-from tables import add_column
+from tables import add_column, get_indicators
 from constants import *
 from server import *
 
@@ -162,11 +162,15 @@ def validate_input(source_name, source_url, start_date, location_column_index, f
         feedback_message = "Please ensure that all indicators are given names"
     elif '' in indicator_names_and_columns[MAX_SOURCE_COLUMN_COUNT:MAX_SOURCE_COLUMN_COUNT + indicator_count]:
         feedback_message = "Please ensure that all indicators are given a column index"
+    elif len([indicator_name for indicator_name in indicator_names_and_columns[:indicator_count]
+              if indicator_name in get_indicators()]) > 0:
+        feedback_message = "Indicator name already exists"
     elif start_option == 'setDate' and start_date is None:
         feedback_message = "Please ensure that a start date is set"
     return feedback_message
 
-#takes a date token and splits into separate day, month, year and static tokens
+
+# takes a date token and splits into separate day, month, year and static tokens
 def split_date_token(date_token):
     tokens = []
     token_index = -1
@@ -194,7 +198,8 @@ def split_date_token(date_token):
             tokens[token_index] += character
     return tokens
 
-#takes the url input string and process it into a list, splits date tokens into component parts
+
+# takes the url input string and process it into a list, splits date tokens into component parts
 def process_url_input(url_input_string):
     tokens = url_input_string.split(' ')
     while '-d' in tokens:
@@ -241,10 +246,10 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
         else:
             start_date = dt.strptime(start_date, '%Y-%m-%d')
         start_date.replace(hour=0, minute=0, second=0)
-        start_date_string = start_date.strfttime("%d/%m/%Y")
+        start_date_string = start_date.strftime("%d/%m/%Y")
         indicators = {}
         for i in range(indicator_count):
-            indicators[indicator_names_and_columns[i * 2]] \
+            indicators[indicator_names_and_columns[i]] \
                 = str(indicator_names_and_columns[MAX_SOURCE_COLUMN_COUNT + i])
         new_source = {'SourceName': source_name,
                       'sourceTokens': source_url.split(' '),
@@ -254,7 +259,7 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
                       'resolution': resolution,
                       'indicatorCount': indicator_count,
                       'indicators': indicators,
-                      'lastUpdate': ''}
+                      'lastUpdate': None}
         dynamodb = boto3.resource('dynamodb', region_name='eu-west-2')
         table = dynamodb.Table('Sources')
         if 'Attributes' in table.put_item(Item=new_source, ReturnValues='ALL_OLD'):
@@ -262,10 +267,10 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
         else:
             feedback_message = "Successfully added new source: " + source_name
         for indicator in indicators.keys():
-            add_column(indicator)
+            add_column(indicator, database_engine)
         job_manager.update_indicators_metadata()
         job_manager.update_commit_schedule(start_date, frequency)
-        job_manager.addJob(start_date, PULL_SOURCE_JOB, source_name)
+        job_manager.add_job(start_date, PULL_SOURCE_JOB, source_name)
         feedback_colour = 'lime'
     return html.Div(feedback_message, style={'background-color': feedback_colour})
 

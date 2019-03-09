@@ -11,16 +11,18 @@ class Model:
     input_models = []
     name = ''
     dataset = ''
-    training_entry_count = 0
+    training_entry_count = MAX_TRAINING_ENTRIES
     type = ''
     target_column_name = ''
 
     def __init__(self, settings):
+        print(settings)
         self.name = settings['name']
         self.input_parameters = settings['input_parameters']
         self.input_models = settings['input_models']
         self.dataset = settings['dataset']
         self.type = settings['type']
+        self.training_entry_count = settings['max_training_examples']
         if self.dataset == 'boston_housing':
             self.target_column_name = DEFAULT_TARGET_HEADER
         else:
@@ -69,6 +71,8 @@ class Model:
         for parent in self.input_models:
             start_parent_inputs.append(parent_predictions[parent]['start'])
             end_parent_inputs.append(parent_predictions[parent]['end'])
+        start_inputs = [start_inputs[parameter_name] for parameter_name in self.input_parameters]
+        end_inputs = [end_inputs[parameter_name] for parameter_name in self.input_parameters]
         start_values = start_parent_inputs + start_inputs
         end_values = end_parent_inputs + end_inputs
         if self.type == 'svm':
@@ -76,8 +80,8 @@ class Model:
             scaled_values = self.scaler.transform([start_values + [0], end_values + [0]])
             start_values = scaled_values[0][:-1]
             end_values = scaled_values[1][:-1]
-        start_prediction = self.model.predict(start_values)
-        end_prediction = self.model.predict(end_values)
+        start_prediction = self.model.predict([start_values])[0]
+        end_prediction = self.model.predict([end_values])[0]
         if self.type == 'svm':
             # Add dummy zero column to fit data to scaler
             scaled_values = self.scaler.inverse_transform([start_values + [start_prediction],

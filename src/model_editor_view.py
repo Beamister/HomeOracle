@@ -139,7 +139,7 @@ def validate_model_input(model_name, model_type, estimator_count, enable_max_tre
                  polynomial_degree, c_value, epsilon_value, dataset, enable_use_entire_dataset, training_examples_count,
                  inflation_adjustment_type, input_parameters, input_models):
     result = ""
-    if model_name != "":
+    if model_name == "":
         result = "Please input model name"
     elif model_name in model_manager.get_model_names():
         result = "Model name already exists"
@@ -220,7 +220,7 @@ def create_model(n_clicks, model_name, model_type, estimator_count, enable_max_t
                 settings['polynomial_degree'] = polynomial_degree
             settings['c_value '] = c_value
             settings['epsilon_value'] = epsilon_value
-            model_manager.add_new_model(settings)
+        model_manager.add_new_model(settings)
         feedback_colour = 'lime'
         feedback_message = "Model successfully created"
     return html.Div(feedback_message, style={'background-color': feedback_colour})

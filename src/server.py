@@ -2,7 +2,7 @@ import dash
 from sqlalchemy import create_engine, Table
 
 from model_manager import ModelManager
-from tables import Base
+from tables import Base, database_engine
 from job_manager import JobManager
 from constants import *
 from json import load, dump
@@ -37,35 +37,27 @@ class ServerState:
         state_file.close()
 
 
-# Called on first run of the server to set up tables and such
+# Called on first run of the server to set up tables and add pull land registry job
 def init():
     Base.metadata.create_all(database_engine)
     job_manager.add_job(datetime.datetime.now(), PULL_LAND_REGISTRY_JOB, '')
 
 
+job_manager = JobManager(1, 'JobsManagerThread', 1, database_engine)
+
+if '-i' in sys.argv:
+    init()
+
 server_state = ServerState()
 
 external_stylesheets = ['']
 
-database_password_file = open('databasePassword.txt', 'r')
-database_password = database_password_file.readline().strip()
-database_password_file.close()
-database_engine = create_engine(
-                    "mysql://luke:" +
-                    database_password +
-                    "@third-year-project.cz8muheslaeo.eu-west-2.rds.amazonaws.com:3306/third_year_project")
-Base.metadata.bind = database_engine
 # Reflect the dataset table from the database
-Table('dataset', Base.metadata, autoload=True, autoload_with=database_engine, keep_existing=False)
-
-job_manager = JobManager(1, 'JobsManagerThread', 1, database_engine)
+Table('dataset', Base.metadata, autoload=True, autoload_with=database_engine, keep_existing=False, extend_existing=True)
 
 # switch to enable just the front end for debugging purposes
 if '-f' not in sys.argv:
     job_manager.start()
-
-if '-i' in sys.argv:
-    init()
 
 model_manager = ModelManager(database_engine)
 

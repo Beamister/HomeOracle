@@ -87,7 +87,9 @@ layout = html.Div(children=[
                                          clearable=False,
                                          options=[{'label': model_name, 'value': model_name}
                                                   for model_name in model_manager.get_trained_model_names()],
-                                         value=model_manager.get_trained_model_names()[0]
+                                         value=(model_manager.get_trained_model_names()[0] if
+                                                len(model_manager.get_trained_model_names()) > 0
+                                                else '')
                                          ),
                             html.Div("Current Price:"),
                             dcc.Input(id='current_price_input',
@@ -175,10 +177,10 @@ def update_map(n_clicks, postcode):
 
 def create_update_input_display_function(id_number):
     def update_container_display(model_name):
-        if id_number < len(model_manager.get_model_inputs(model_name)):
-            return {'display': 'flex', 'justify-content': 'space-around'}
-        else:
+        if model_name == '' or id_number >= len(model_manager.get_model_inputs(model_name)):
             return {'display': 'none'}
+        else:
+            return {'display': 'flex', 'justify-content': 'space-around'}
     return update_container_display
 
 
@@ -190,6 +192,8 @@ for input_index in range(model_manager.get_max_model_inputs()):
 
 def create_update_input_text_function(id_number, base_text):
     def update_input_text(model_name):
+        if model_name == '':
+            return ""
         model_inputs = model_manager.get_model_inputs(model_name)
         if id_number < len(model_inputs):
             return base_text + model_inputs[id_number] + ":"

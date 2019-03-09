@@ -1,3 +1,4 @@
+from sqlalchemy import Table
 from server import app, database_engine
 from sqlalchemy.orm import sessionmaker
 from tables import Base, get_class_by_tablename
@@ -60,9 +61,11 @@ layout = html.Div(children=[
                Input('page_select', 'value')])
 def update_table_rows(table_name, page_number):
     session = session_maker()
+    Table('dataset', Base.metadata, autoload=True, autoload_with=database_engine,
+          keep_existing=False, extend_existing=True)
     entries = session.query(Base.metadata.tables[table_name])\
-                            .offset(RDS_VIEW_ROW_COUNT * (page_number - 1))\
-                            .limit(RDS_VIEW_ROW_COUNT).all()
+                     .offset(RDS_VIEW_ROW_COUNT * (page_number - 1))\
+                     .limit(RDS_VIEW_ROW_COUNT).all()
     column_names = Base.metadata.tables[table_name].columns.keys()
     rows = []
     if len(entries) > 0:

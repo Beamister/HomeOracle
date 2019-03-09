@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, BigInteger, Float, Date, Table, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, BigInteger, Float, Date, Table, DateTime, create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 import boto3
@@ -6,7 +6,13 @@ import server
 from constants import *
 
 Base = declarative_base()
-
+database_password_file = open('databasePassword.txt', 'r')
+database_password = database_password_file.readline().strip()
+database_password_file.close()
+database_engine = create_engine(
+                    "mysql://luke:" +
+                    database_password +
+                    "@third-year-project.cz8muheslaeo.eu-west-2.rds.amazonaws.com:3306/third_year_project")
 
 def get_class_by_tablename(tablename):
     for c in Base._decl_class_registry.values():
@@ -19,18 +25,18 @@ def get_indicators():
     sources_table = dynamodb.Table('Sources')
     indicators = []
     for source_indicators in sources_table.scan(ProjectionExpression='indicators')['Items']:
-        indicators += list(source_indicators.keys())
+        indicators += list(source_indicators['indicators'].keys())
+    return indicators
 
 
-def add_column(column_name, tablename='dataset', column_type='float'):
-    session_maker = scoped_session(sessionmaker(bind=server.database_engine))
-    session = session_maker()
-    statement = f'ALTER TABLE {tablename} ADD {column_name} {column_type}'
-    session.execute(statement)
-    session.commit()
-    session.close()
+def add_column(column_name, database_engine, tablename='dataset'):
+    column = Column(column_name, Float, primary_key=True)
+    column_name = column.compile(dialect=database_engine.dialect)
+    column_type = column.type.compile(database_engine.dialect)
+    database_engine.execute('ALTER TABLE %s ADD COLUMN %s %s' % (tablename, column_name, column_type))
     # Refresh the table details held in metadata by reflecting from database
-    Table(tablename, Base.metadata, autoload=True, autoload_with=server.database_engine, keep_existing=False)
+    Table(tablename, Base.metadata, autoload=True, autoload_with=server.database_engine,
+          keep_existing=False, extend_existing=True)
 
 
 class Job(Base):
@@ -108,7 +114,7 @@ class Locations(Base):
     pfa = Column(String(9))  # police_force.csv, police force area
 
 
-class Model(Base):
+class ModelEntry(Base):
     __tablename__ = 'models'
     name = Column(String(64), primary_key=True)
     type = Column(String(32))
