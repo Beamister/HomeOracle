@@ -33,11 +33,12 @@ class ModelTrainer(threading.Thread):
         for parent_model in parent_models:
             # Train any untrained parent models
             if self.session.query(ModelEntry).filter(ModelEntry.name == parent_model, ModelEntry.state == 'untrained')\
-                    .exists().scalar():
+                    is not None:
                 self.train_model(parent_model)
             # Wait for any parent models that are still in training, in cases where another process started the training
-            while self.session.query(ModelEntry).filter(ModelEntry.name == parent_model, ModelEntry.state == 'training')\
-                    .exists().scalar():
+            while self.session.query(ModelEntry).filter(ModelEntry.name == parent_model,
+                                                        ModelEntry.state == 'training').one_or_none()\
+                    is not None:
                 time.sleep(30)
         model = self.model_manager.models[model_name]
         dataset_name = model.dataset

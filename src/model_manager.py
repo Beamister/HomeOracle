@@ -141,7 +141,7 @@ class ModelManager:
 
     def get_model_dependencies(self, model_name):
         dependencies_list = []
-        dependency_entries = self.session.query(Dependency).filter(Dependency.child == model_name)
-        for dependency_entry in dependency_entries:
-            dependencies_list.append(dependency_entry.parent)
-        return dependencies_list
+        for parent_model in self.models[model_name].input_models:
+            dependencies_list.append(parent_model)
+            dependencies_list += self.get_model_dependencies(parent_model)
+        return list(set(dependencies_list))
