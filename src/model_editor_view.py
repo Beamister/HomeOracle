@@ -218,7 +218,7 @@ def create_model(n_clicks, model_name, model_type, estimator_count, enable_max_t
             settings['kernel_type'] = kernel_type
             if kernel_type == 'polynomial':
                 settings['polynomial_degree'] = polynomial_degree
-            settings['c_value '] = c_value
+            settings['c_value'] = c_value
             settings['epsilon_value'] = epsilon_value
         model_manager.add_new_model(settings)
         feedback_colour = 'lime'

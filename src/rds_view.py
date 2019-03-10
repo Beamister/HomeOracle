@@ -61,7 +61,7 @@ layout = html.Div(children=[
                Input('page_select', 'value')])
 def update_table_rows(table_name, page_number):
     session = session_maker()
-    Table('dataset', Base.metadata, autoload=True, autoload_with=database_engine,
+    Table('core_dataset', Base.metadata, autoload=True, autoload_with=database_engine,
           keep_existing=False, extend_existing=True)
     entries = session.query(Base.metadata.tables[table_name])\
                      .offset(RDS_VIEW_ROW_COUNT * (page_number - 1))\

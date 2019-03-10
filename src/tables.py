@@ -12,7 +12,9 @@ database_password_file.close()
 database_engine = create_engine(
                     "mysql://luke:" +
                     database_password +
-                    "@third-year-project.cz8muheslaeo.eu-west-2.rds.amazonaws.com:3306/third_year_project")
+                    "@third-year-project.cz8muheslaeo.eu-west-2.rds.amazonaws.com:3306/third_year_project",
+                    isolation_level="READ UNCOMMITTED"
+                    )
 
 def get_class_by_tablename(tablename):
     for c in Base._decl_class_registry.values():
@@ -29,7 +31,7 @@ def get_indicators():
     return indicators
 
 
-def add_column(column_name, database_engine, tablename='dataset'):
+def add_column(column_name, database_engine, tablename='core_dataset'):
     column = Column(column_name, Float, primary_key=True)
     column_name = column.compile(dialect=database_engine.dialect)
     column_type = column.type.compile(database_engine.dialect)
@@ -67,12 +69,11 @@ class StagedEntry(Base):
     postcode = Column(String(16))
     new_property_flag = Column(Boolean)
     property_type = Column(String(1))
-    tenure_type = Column(String(1))
     record_type = Column(String(1))
 
 
 class TargetEntry(Base):
-    __tablename__ = 'dataset'
+    __tablename__ = 'core_dataset'
     entry_id = Column(BigInteger, primary_key=True)
     sale_id = Column(String(48))
     date = Column(Date)
@@ -81,7 +82,6 @@ class TargetEntry(Base):
     postcode = Column(String(16))
     new_property_flag = Column(Boolean)
     property_type = Column(String(1))
-    tenure_type = Column(String(1))
 
 
 class IndicatorValue(Base):
@@ -89,6 +89,7 @@ class IndicatorValue(Base):
     date = Column(Date, primary_key=True)
     indicator = Column(String(64), primary_key=True)
     location = Column(String(64), primary_key=True)
+    value = Column(Float)
 
 
 class Locations(Base):

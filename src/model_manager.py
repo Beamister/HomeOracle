@@ -21,7 +21,7 @@ class ModelManager:
         for model_name in self.get_model_names():
             self.load_model(model_name)
         # Find largest model input count after all models loaded
-        for model_name in self.get_model_names():
+        for model_name in self.get_trained_model_names():
             model_input_count = len(self.get_model_inputs(model_name))
             if model_input_count > self.max_inputs:
                 self.max_inputs = model_input_count
@@ -35,8 +35,9 @@ class ModelManager:
             model_records = self.session.query(ModelEntry).all()
         else:
             model_records = self.session.query(ModelEntry).filter(ModelEntry.dataset == dataset_name)
-        for model in model_records:
-            model_names.append(model.name)
+        if model_records is not None:
+            for model in model_records:
+                model_names.append(model.name)
         return model_names
 
     def get_trained_model_names(self, dataset_name=None):
@@ -45,7 +46,7 @@ class ModelManager:
             model_records = self.session.query(ModelEntry.name).filter(ModelEntry.state == 'trained')
         else:
             model_records = self.session.query(ModelEntry.name).filter(ModelEntry.dataset == dataset_name,
-                                                                     ModelEntry.state == 'trained')
+                                                                       ModelEntry.state == 'trained')
         for model in model_records:
             model_names.append(model.name)
         return model_names
@@ -68,13 +69,14 @@ class ModelManager:
                                       dataset=settings['dataset'], state='untrained')
         self.session.add(new_model_record)
         self.session.commit()
-        model_input_count = len(self.get_model_inputs(new_model_name))
-        if model_input_count > self.max_inputs:
-            self.max_inputs = model_input_count
 
     def train_model(self, model_name):
         model_trainer_thread = ModelTrainer(self, model_name, self.database_engine)
         model_trainer_thread.start()
+
+    def update_max_inputs(self, model_input_count):
+        if model_input_count > self.max_inputs:
+            self.max_inputs = model_input_count
 
     def delete_model(self, model_name):
         model_record = self.session.query(ModelEntry).filter(ModelEntry.name == model_name)
@@ -82,6 +84,12 @@ class ModelManager:
         self.session.commit()
         del self.models[model_name]
         os.remove(model_name)
+        # Update max inputs value
+        self.max_inputs = 0
+        for model_name in self.get_trained_model_names():
+            model_input_count = len(self.get_model_inputs(model_name))
+            if model_input_count > self.max_inputs:
+                self.max_inputs = model_input_count
 
     def get_recursive_prediction(self, model_name, start_price, start_inputs, end_inputs):
         model = self.models[model_name]

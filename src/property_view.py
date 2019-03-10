@@ -118,10 +118,19 @@ layout = html.Div(children=[
 ])
 
 
+@app.callback(Output('predict_button', 'style'),
+              [Input('predictor_model_select', 'value')])
+def update_predict_button_display(model_select):
+    if model_select is None or model_select == '':
+        return {'display': 'none', 'width': '30%', 'padding': '0'}
+    else:
+        return {'width': '30%', 'padding': '0'}
+
+
 def get_lat_and_long(postcode):
     session_maker = sessionmaker(bind=database_engine)
     session = session_maker()
-    postcode_record = session.query(Locations).filter(Locations.pcds==postcode).first()
+    postcode_record = session.query(Locations).filter(Locations.pcds == postcode).first()
     if postcode_record is not None:
         return postcode_record.lat, postcode_record.long
     else:

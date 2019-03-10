@@ -16,7 +16,6 @@ class Model:
     target_column_name = ''
 
     def __init__(self, settings):
-        print(settings)
         self.name = settings['name']
         self.input_parameters = settings['input_parameters']
         self.input_models = settings['input_models']
@@ -39,7 +38,7 @@ class Model:
             if kernel == 'polynomial':
                 degree = settings['polynomial_degree']
             else:
-                degree = None
+                degree = DEFAULT_SVM_DEGREE
             self.model = SVR(kernel=kernel, C=c_value, epsilon=epsilon_value, degree=degree)
         else:
             raise Exception("Invalid model type")
@@ -83,9 +82,10 @@ class Model:
         start_prediction = self.model.predict([start_values])[0]
         end_prediction = self.model.predict([end_values])[0]
         if self.type == 'svm':
-            # Add dummy zero column to fit data to scaler
-            scaled_values = self.scaler.inverse_transform([start_values + [start_prediction],
-                                                           end_values + [end_prediction]])
+            # Add dummy zero columns to fit data to scaler
+            dummy_columns = [0] * len(start_parent_inputs + start_inputs)
+            scaled_values = self.scaler.inverse_transform([dummy_columns + [start_prediction],
+                                                           dummy_columns + [end_prediction]])
             start_prediction = scaled_values[0][-1]
             end_prediction = scaled_values[1][-1]
         final_price_prediction = start_price * (end_prediction / start_prediction)
@@ -98,7 +98,8 @@ class Model:
     # Takes in dataframe to train the base model
     def train(self, training_values):
         if self.type == 'svm':
-            column_names = self.input_models + self.input_parameters + [self.target_column_name]
+            column_names = self.input_models + self.input_parameters
+            column_names.append(self.target_column_name)
             training_values = self.scaler.fit_transform(training_values[column_names])
             training_values = pandas.DataFrame(training_values, columns=column_names)
         self.model.fit(training_values[self.input_models + self.input_parameters],

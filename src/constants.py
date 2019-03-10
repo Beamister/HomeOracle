@@ -24,12 +24,12 @@ LAND_REGISTRY_DATA_HEADERS = ['sale_id', 'price', 'date', 'postcode', 'property_
                               'PAON', 'SAON', 'street', 'locality', 'town/city', 'district', 'county', 'PDD_type',
                               'record_status']
 
-STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'price', 'PDD_type', 'postcode', 'new_property_flag', 'property_type',
+STAGED_ENTRY_HEADERS = ['sale_id', 'date', 'value', 'PDD_type', 'postcode', 'new_property_flag', 'property_type',
                         'record_status']
 
 CORE_METADATA_HEADERS = ['entry_id', 'sale_id', 'date', 'value', 'PDD_type', 'postcode', 'new_property_flag',
                          'property_type', 'tenure_type']
-CORE_TARGET_HEADER = 'price'
+CORE_TARGET_HEADER = 'value'
 
 AWS_REGION = 'eu-west-2'
 
@@ -80,6 +80,7 @@ AREA_RESOLUTIONS = {'ward': 'Ward',
 SERVER_STATE_FILE = 'state.json'
 
 MAX_TRAINING_ENTRIES = 100000
+DEFAULT_SVM_DEGREE = 3
 
 # Number of seconds for managers to wait before polling again after empty result
 JOB_MANAGER_POLL_DELAY = 600

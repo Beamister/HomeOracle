@@ -1,7 +1,7 @@
 import threading
 from sqlalchemy.orm import sessionmaker, query
 from sqlalchemy.sql.expression import func
-from tables import ModelEntry, TargetEntry
+from tables import ModelEntry, TargetEntry, Base
 import time
 import pandas
 from constants import *
@@ -43,7 +43,7 @@ class ModelTrainer(threading.Thread):
         dataset_name = model.dataset
         entry_count = model.training_entry_count
         if dataset_name == 'core_dataset':
-            dataframe = pandas.read_sql(query(TargetEntry).order_by(func.rand()).limit(entry_count),
+            dataframe = pandas.read_sql(self.session.query(Base.metadata.tables['core_dataset']).order_by(func.rand()).limit(entry_count).statement,
                                         self.database_engine)
         else:
             dataframe = pandas.read_csv(DEFAULT_DATA_PATH, sep='\s+', names=DEFAULT_DATA_HEADERS)
@@ -56,6 +56,8 @@ class ModelTrainer(threading.Thread):
         self.model_manager.save_model(model_name)
         model_record.state = 'trained'
         self.session.commit()
+        # Update the model manager max input count - done here to happen at the end of training
+        self.model_manager.update_max_inputs(len(self.model_manager.get_model_inputs(model_name)))
 
     def run(self):
         self.train_model(self.bottom_model_name)
