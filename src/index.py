@@ -38,7 +38,7 @@ def display_page(value):
     if value == 'dataView':
         return data_view.layout
     elif value == 'propertyView':
-        return property_view.layout
+        return property_view.create_layout()
     elif value == 'modelView':
         return model_view.layout
     elif value == 'modelEditorView':

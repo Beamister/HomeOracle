@@ -8,9 +8,9 @@ from constants import *
 
 
 parameter_input_containers = []
-for input_index in range(model_manager.get_max_model_inputs()):
+for input_index in range(model_manager.get_max_model_inputs() + PROPERTY_VIEW_MIN_INPUTS):
         new_container = html.Div(id='parameter_input_container-' + str(input_index),
-                                 style={'display': 'flex', 'justify-content': 'space-around'},
+                                 style={'display': 'none', 'justify-content': 'space-around'},
                                  children=[
                                      html.Div(style={'display': 'flex-box', 'width': '48%'},
                                               children=[
@@ -57,64 +57,67 @@ map_layout = go.Layout(
     ),
 )
 
-layout = html.Div(children=[
-    html.H1("Property Value Predictor"),
-    html.Div(id='property_predictor_feedback_container'),
-    html.Div(id='top_container',
-             style={'display': 'flex', 'justify-content': 'space-around', 'height': '15em'},
-             children=[
-                dcc.Graph(id='map_container',
-                          style={'display': 'flex-box', 'width': '48%', 'height': '15em'},
-                          figure=go.Figure(data=map_data,
-                                           layout=map_layout
-                                           )
-                          ),
-                html.Div(id='top_right_container',
-                         style={'display': 'flex-box', 'width': '48%'},
-                         children=[
-                            html.Div("Postcode:"),
-                            dcc.Input(id='postcode_input',
-                                      style={'width': '70%', 'padding': '0'},
-                                      type='text'
-                                      ),
-                            html.Button("Auto Fill",
-                                        id='auto_fill_button',
-                                        style={'width': '30%', 'padding': '0'}
-                                        ),
-                            html.Div("Select Model:"),
-                            dcc.Dropdown(id='predictor_model_select',
-                                         clearable=False,
-                                         options=[{'label': model_name, 'value': model_name}
-                                                  for model_name in model_manager.get_trained_model_names()],
-                                         value=(model_manager.get_trained_model_names()[0] if
-                                                len(model_manager.get_trained_model_names()) > 0
-                                                else '')
+def create_layout():
+    layout = html.Div(children=[
+        html.H1("Property Value Predictor"),
+        html.Div(id='property_predictor_feedback_container'),
+        html.Div(id='top_container',
+                 style={'display': 'flex', 'justify-content': 'space-around', 'height': '15em'},
+                 children=[
+                    dcc.Graph(id='map_container',
+                              style={'display': 'flex-box', 'width': '48%', 'height': '15em'},
+                              figure=go.Figure(data=map_data,
+                                               layout=map_layout
+                                               )
+                              ),
+                    html.Div(id='top_right_container',
+                             style={'display': 'flex-box', 'width': '48%'},
+                             children=[
+                                html.Div("Postcode:"),
+                                dcc.Input(id='postcode_input',
+                                          style={'width': '70%', 'padding': '0'},
+                                          type='text'
+                                          ),
+                                html.Button("Auto Fill",
+                                            id='auto_fill_button',
+                                            style={'width': '30%', 'padding': '0'}
+                                            ),
+                                html.Div("Select Model:"),
+                                dcc.Dropdown(id='predictor_model_select',
+                                             clearable=False,
+                                             options=[{'label': model_name, 'value': model_name}
+                                                      for model_name in model_manager.get_trained_model_names()],
+                                             value=(model_manager.get_trained_model_names()[0] if
+                                                    len(model_manager.get_trained_model_names()) > 0
+                                                    else '')
+                                             ),
+                                html.Div("Current Price:"),
+                                dcc.Input(id='current_price_input',
+                                          style={'width': '70%', 'padding': '0'},
+                                          type='number',
+                                          value=0
+                                          ),
+                                html.Button("Predict",
+                                            id='predict_button',
+                                            style={'width': '30%', 'padding': '0'}
+                                            ),
+                                html.Div(id='prediction_container',
+                                         children=""
                                          ),
-                            html.Div("Current Price:"),
-                            dcc.Input(id='current_price_input',
-                                      style={'width': '70%', 'padding': '0'},
-                                      type='number',
-                                      value=0
-                                      ),
-                            html.Button("Predict",
-                                        id='predict_button',
-                                        style={'width': '30%', 'padding': '0'}
-                                        ),
-                            html.Div(id='prediction_container',
-                                     children=""
-                                     ),
-                            html.Div(id='dummy_predictions_container',
-                                     style={'display': 'none'},
-                                     children=[html.Div(id='dummy_prediction_' + model_name)
-                                               for model_name in model_manager.get_trained_model_names()]
-                                     ),
-                         ])
-             ]),
-    html.Br(),
-    html.Div(id='parameter_input_container',
-             children=parameter_input_containers
-             ),
-])
+                                html.Div(id='dummy_predictions_container',
+                                         style={'display': 'none'},
+                                         children=[html.Div(id='dummy_prediction_' + model_name)
+                                                   for model_name in model_manager.get_trained_model_names()]
+                                         ),
+                             ])
+                 ]),
+        html.Br(),
+        html.Div(id='parameter_input_container',
+                 children=parameter_input_containers
+                 ),
+    ])
+
+    return layout
 
 
 @app.callback(Output('predict_button', 'style'),
@@ -192,7 +195,7 @@ def create_update_input_display_function(id_number):
     return update_container_display
 
 
-for input_index in range(model_manager.get_max_model_inputs()):
+for input_index in range(model_manager.get_max_model_inputs() + PROPERTY_VIEW_MIN_INPUTS):
     update_display_function = create_update_input_display_function(input_index)
     app.callback(Output('parameter_input_container-' + str(input_index), 'style'),
                  [Input('predictor_model_select', 'value')])(update_display_function)
@@ -210,7 +213,7 @@ def create_update_input_text_function(id_number, base_text):
     return update_input_text
 
 
-for input_index in range(model_manager.get_max_model_inputs()):
+for input_index in range(model_manager.get_max_model_inputs() + PROPERTY_VIEW_MIN_INPUTS):
     start_update_text_function = create_update_input_text_function(input_index, "Start ")
     end_update_text_function = create_update_input_text_function(input_index, "End ")
     app.callback(Output('start_parameter_text-' + str(input_index), 'children'),

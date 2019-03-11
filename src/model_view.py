@@ -3,7 +3,6 @@ import dash_core_components as dcc
 import dash_table_experiments as dt
 from dash.dependencies import Input, Output, State
 from server import *
-import time
 
 
 layout = html.Div(children=[
@@ -44,7 +43,6 @@ layout = html.Div(children=[
                Input('retrain_button_clicks', 'children'),
                Input('timer', 'n_intervals')])
 def update_model_table(delete_clicks, retrain_clicks, n_intervals):
-    time.sleep(1)
     return model_manager.get_model_table()
 
 
