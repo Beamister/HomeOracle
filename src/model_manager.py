@@ -1,8 +1,7 @@
 from constants import *
-from sqlalchemy.orm import sessionmaker
 
 from model_trainer import ModelTrainer
-from tables import Dependency, ModelEntry, TargetEntry
+from tables import Dependency, ModelEntry, TargetEntry, Session
 from model import Model
 import os
 import pickle
@@ -16,8 +15,7 @@ class ModelManager:
 
     def __init__(self, database_engine):
         self.database_engine = database_engine
-        session = sessionmaker(bind=self.database_engine)
-        self.session = session()
+        session = Session()
         for model_name in self.get_model_names():
             self.load_model(model_name)
         # Find largest model input count after all models loaded
@@ -26,38 +24,45 @@ class ModelManager:
             if model_input_count > self.max_inputs:
                 self.max_inputs = model_input_count
         # Check for models that were in training when last shut down
-        for model_record in self.session.query(ModelEntry).filter(ModelEntry.state == 'training'):
+        for model_record in session.query(ModelEntry).filter(ModelEntry.state == 'training'):
             self.train_model(model_record.name)
+        session.close()
 
     def get_model_names(self, dataset_name=None):
+        session = Session()
         model_names = []
         if dataset_name is None:
-            model_records = self.session.query(ModelEntry).all()
+            model_records = session.query(ModelEntry).all()
         else:
-            model_records = self.session.query(ModelEntry).filter(ModelEntry.dataset == dataset_name)
+            model_records = session.query(ModelEntry).filter(ModelEntry.dataset == dataset_name)
         if model_records is not None:
             for model in model_records:
                 model_names.append(model.name)
+        session.close()
         return model_names
 
     def get_trained_model_names(self, dataset_name=None):
         model_names = []
+        session = Session()
         if dataset_name is None:
-            model_records = self.session.query(ModelEntry.name).filter(ModelEntry.state == 'trained')
+            model_records = session.query(ModelEntry.name).filter(ModelEntry.state == 'trained')
         else:
-            model_records = self.session.query(ModelEntry.name).filter(ModelEntry.dataset == dataset_name,
-                                                                       ModelEntry.state == 'trained')
+            model_records = session.query(ModelEntry.name).filter(ModelEntry.dataset == dataset_name,
+                                                                  ModelEntry.state == 'trained')
         for model in model_records:
             model_names.append(model.name)
+        session.close()
         return model_names
 
     def get_model_table(self):
-        models_entries = self.session.query(ModelEntry)
+        session = Session()
+        models_entries = session.query(ModelEntry)
         table = []
         for model_entry in models_entries:
             dependencies = ", ".join(self.get_model_dependencies(model_entry.name))
             table.append({'Name': model_entry.name, 'Type': model_entry.type, 'Dataset': model_entry.dataset,
                           'State': model_entry.state, 'Dependencies': dependencies})
+        session.close()
         return table
 
     def add_new_model(self, settings):
@@ -67,8 +72,10 @@ class ModelManager:
         self.save_model(new_model_name)
         new_model_record = ModelEntry(name=settings['name'], type=settings['type'],
                                       dataset=settings['dataset'], state='untrained')
-        self.session.add(new_model_record)
-        self.session.commit()
+        session = Session()
+        session.add(new_model_record)
+        session.commit()
+        session.close()
 
     def train_model(self, model_name):
         model_trainer_thread = ModelTrainer(self, model_name, self.database_engine)
@@ -79,9 +86,10 @@ class ModelManager:
             self.max_inputs = model_input_count
 
     def delete_model(self, model_name):
-        model_record = self.session.query(ModelEntry).filter(ModelEntry.name == model_name)
+        session = Session()
+        model_record = session.query(ModelEntry).filter(ModelEntry.name == model_name)
         model_record.delete()
-        self.session.commit()
+        session.commit()
         del self.models[model_name]
         os.remove(model_name)
         # Update max inputs value
@@ -90,6 +98,7 @@ class ModelManager:
             model_input_count = len(self.get_model_inputs(model_name))
             if model_input_count > self.max_inputs:
                 self.max_inputs = model_input_count
+        session.close()
 
     def get_recursive_prediction(self, model_name, start_price, start_inputs, end_inputs):
         model = self.models[model_name]

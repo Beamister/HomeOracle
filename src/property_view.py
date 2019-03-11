@@ -2,8 +2,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output, State
-from tables import Locations
-from sqlalchemy.orm import sessionmaker
+from tables import Locations, Session
 from server import *
 from constants import *
 
@@ -128,9 +127,9 @@ def update_predict_button_display(model_select):
 
 
 def get_lat_and_long(postcode):
-    session_maker = sessionmaker(bind=database_engine)
-    session = session_maker()
+    session = Session()
     postcode_record = session.query(Locations).filter(Locations.pcds == postcode).first()
+    session.close()
     if postcode_record is not None:
         return postcode_record.lat, postcode_record.long
     else:

@@ -31,3 +31,4 @@ for indicator in source_data['indicators'].keys():
     else:
         print('Indicator not found in database')
 sources_table.delete_item(Key={'SourceName': source_name})
+session.close()

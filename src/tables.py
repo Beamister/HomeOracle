@@ -5,6 +5,7 @@ import boto3
 import server
 from constants import *
 
+
 Base = declarative_base()
 database_password_file = open('databasePassword.txt', 'r')
 database_password = database_password_file.readline().strip()
@@ -15,6 +16,7 @@ database_engine = create_engine(
                     "@third-year-project.cz8muheslaeo.eu-west-2.rds.amazonaws.com:3306/third_year_project",
                     isolation_level="READ UNCOMMITTED"
                     )
+Session = scoped_session(sessionmaker(bind=database_engine))
 
 def get_class_by_tablename(tablename):
     for c in Base._decl_class_registry.values():

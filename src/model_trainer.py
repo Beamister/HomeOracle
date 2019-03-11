@@ -1,7 +1,7 @@
 import threading
 from sqlalchemy.orm import sessionmaker, query
 from sqlalchemy.sql.expression import func
-from tables import ModelEntry, TargetEntry, Base
+from tables import ModelEntry, TargetEntry, Base, Session
 import time
 import pandas
 from constants import *
@@ -14,8 +14,6 @@ class ModelTrainer(threading.Thread):
         self.database_engine = database_engine
         self.model_manager = model_manager
         self.bottom_model_name = model_name
-        session = sessionmaker(bind=database_engine)
-        self.session = session()
 
     # Recursively processes training data through parent models
     def recursive_process(self, model_name, dataframe):
@@ -26,17 +24,18 @@ class ModelTrainer(threading.Thread):
         dataframe[model_name] = model_output
 
     def train_model(self, model_name):
-        model_record = self.session.query(ModelEntry).filter(ModelEntry.name == model_name).one()
+        session = Session()
+        model_record = session.query(ModelEntry).filter(ModelEntry.name == model_name).one()
         model_record.state = 'training'
-        self.session.commit()
+        session.commit()
         parent_models = self.model_manager.models[model_name].input_models
         for parent_model in parent_models:
             # Train any untrained parent models
-            if self.session.query(ModelEntry).filter(ModelEntry.name == parent_model, ModelEntry.state == 'untrained')\
+            if session.query(ModelEntry).filter(ModelEntry.name == parent_model, ModelEntry.state == 'untrained')\
                     is not None:
                 self.train_model(parent_model)
             # Wait for any parent models that are still in training, in cases where another process started the training
-            while self.session.query(ModelEntry).filter(ModelEntry.name == parent_model,
+            while session.query(ModelEntry).filter(ModelEntry.name == parent_model,
                                                         ModelEntry.state == 'training').one_or_none()\
                     is not None:
                 time.sleep(30)
@@ -44,7 +43,7 @@ class ModelTrainer(threading.Thread):
         dataset_name = model.dataset
         entry_count = model.training_entry_count
         if dataset_name == 'core_dataset':
-            dataframe = pandas.read_sql(self.session.query(Base.metadata.tables['core_dataset']).order_by(func.rand()).limit(entry_count).statement,
+            dataframe = pandas.read_sql(session.query(Base.metadata.tables['core_dataset']).order_by(func.rand()).limit(entry_count).statement,
                                         self.database_engine)
         else:
             dataframe = pandas.read_csv(DEFAULT_DATA_PATH, sep='\s+', names=DEFAULT_DATA_HEADERS)
@@ -56,10 +55,10 @@ class ModelTrainer(threading.Thread):
         model.train(dataframe)
         self.model_manager.save_model(model_name)
         model_record.state = 'trained'
-        self.session.commit()
+        session.commit()
         # Update the model manager max input count - done here to happen at the end of training
         self.model_manager.update_max_inputs(len(self.model_manager.get_model_inputs(model_name)))
+        session.close()
 
     def run(self):
         self.train_model(self.bottom_model_name)
-        self.session.close()

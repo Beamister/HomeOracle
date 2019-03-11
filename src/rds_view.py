@@ -1,14 +1,12 @@
 from sqlalchemy import Table
 from server import app, database_engine
-from sqlalchemy.orm import sessionmaker
-from tables import Base, get_class_by_tablename
+from tables import Base, get_class_by_tablename, Session
 from constants import *
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table_experiments as dt
 
-session_maker = sessionmaker(bind=database_engine)
 table_names = database_engine.table_names()
 
 layout = html.Div(children=[
@@ -60,7 +58,7 @@ layout = html.Div(children=[
               [Input('table_select', 'value'),
                Input('page_select', 'value')])
 def update_table_rows(table_name, page_number):
-    session = session_maker()
+    session = Session()
     Table('core_dataset', Base.metadata, autoload=True, autoload_with=database_engine,
           keep_existing=False, extend_existing=True)
     entries = session.query(Base.metadata.tables[table_name])\
@@ -87,7 +85,7 @@ def update_table_rows(table_name, page_number):
 @app.callback(Output('page_select', 'options'),
               [Input('table_select', 'value')])
 def update_page_select_options(table_name):
-    session = session_maker()
+    session = Session()
     class_type = get_class_by_tablename(table_name)
     row_count = session.query(class_type).count()
     session.close()

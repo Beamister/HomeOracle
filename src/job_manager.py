@@ -5,8 +5,7 @@ from time import sleep
 from urllib import request
 import boto3
 from sqlalchemy import desc
-from sqlalchemy.orm import sessionmaker
-from tables import Job, StagedEntry, TargetEntry, IndicatorValue
+from tables import Job, StagedEntry, TargetEntry, IndicatorValue, Session
 import pandas
 from io import StringIO
 from constants import *
@@ -115,8 +114,6 @@ class JobManager(threading.Thread):
         self.thread_id = thread_id
         self.thread_name = thread_name
         self.counter = counter
-        session = sessionmaker(bind=self.database_engine)
-        self.session = session()
         dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
         self.sources_table = dynamodb.Table('Sources')
         self.update_indicators_metadata()
@@ -136,20 +133,22 @@ class JobManager(threading.Thread):
         return datetime.datetime.now()
 
     def update_entries_from_source(self, source_entry_date, frequency, indicators, area_resolution):
+        session = Session()
         frequency_radius_delta = relativedelta(FREQUENCY_DAY_COUNTS[frequency] / 2)
         lower_threshold_date = source_entry_date - frequency_radius_delta
         upper_threshold_date = source_entry_date + frequency_radius_delta
         # noinspection PyComparisonWithNone
-        entries_to_update = self.session.query(TargetEntry).filter(getattr(TargetEntry, indicators[0]) == None,
+        entries_to_update = session.query(TargetEntry).filter(getattr(TargetEntry, indicators[0]) == None,
                                                                    TargetEntry.date >= lower_threshold_date,
                                                                    TargetEntry.date <= upper_threshold_date)
         for entry in entries_to_update:
             location = self.location_engine.convert_postcode(entry.postcode, area_resolution)
             for indicator in indicators:
-                value = self.session.query(IndicatorValue).filter(IndicatorValue == source_entry_date,
+                value = session.query(IndicatorValue).filter(IndicatorValue == source_entry_date,
                                                                   IndicatorValue.location == location)
                 setattr(entry, indicator, value)
-        self.session.commit()
+        session.commit()
+        session.close()
 
     def pull_source(self, job):
         source_name = str(job.details)
@@ -177,6 +176,7 @@ class JobManager(threading.Thread):
         return next_pull_datetime
 
     def pull_land_registry(self):
+        session = Session()
         data = request.urlopen(LAND_REGISTRY_URL).read()
         data = str(data, 'utf-8')
         data_frame = pandas.read_csv(StringIO(data), header=None, names=LAND_REGISTRY_DATA_HEADERS)
@@ -189,7 +189,7 @@ class JobManager(threading.Thread):
         # Convert old or new character value to boolean
         data_frame['new_property_flag'] = data_frame['new_property_flag'].map(dict(Y=True, N=False))
         current_highest_id = -1
-        latest_entry = self.session.query(StagedEntry).order_by(desc(StagedEntry.entry_id)).first()
+        latest_entry = session.query(StagedEntry).order_by(desc(StagedEntry.entry_id)).first()
         if latest_entry is not None:
             current_highest_id = latest_entry.id
         batch_start_id = current_highest_id + 1
@@ -198,29 +198,32 @@ class JobManager(threading.Thread):
         data_frame.insert(0, 'entry_id', range(batch_start_id, batch_end_id))
         data_frame.to_sql('staged_entries', con=self.database_engine, if_exists='append', index=False)
         # Process deletion entries
-        deletion_entries = self.session.query(StagedEntry).filter(StagedEntry.record_type == 'D')
+        deletion_entries = session.query(StagedEntry).filter(StagedEntry.record_type == 'D')
         for deletion_entry in deletion_entries:
-            self.session.query(TargetEntry).filter(TargetEntry.sale_id == deletion_entry.sale_id).delete()
+            session.query(TargetEntry).filter(TargetEntry.sale_id == deletion_entry.sale_id).delete()
             deletion_entry.delete()
         # Get update entries
-        update_entries = self.session.query(StagedEntry).filter(StagedEntry.record_type == 'C')
+        update_entries = session.query(StagedEntry).filter(StagedEntry.record_type == 'C')
         for update_entry in update_entries:
-            existing_entry = self.session.query(TargetEntry).filter(TargetEntry.sale_id == update_entry.sale_id).one()
+            existing_entry = session.query(TargetEntry).filter(TargetEntry.sale_id == update_entry.sale_id).one()
             if existing_entry is not None:
                 update_entry_from_land_registry(update_entry, existing_entry)
             update_entry.delete()
-            self.session.commit()
+            session.commit()
+        session.close()
         return str(batch_end_id)
 
     def run(self):
         running = True
         while running:
-            current_job = self.session.query(Job).order_by(Job.timestamp_when_valid).first()
+            session = Session()
+            current_job = session.query(Job).order_by(Job.timestamp_when_valid).first()
             if current_job is None or current_job.timestamp_when_valid > datetime.datetime.now():
                 sleep(JOB_MANAGER_POLL_DELAY)
             else:
                 self.complete_job(current_job)
                 current_job.delete()
+            session.close()
 
     def complete_job(self, job):
         if job.job_type == PULL_SOURCE_JOB:
@@ -248,6 +251,7 @@ class JobManager(threading.Thread):
 
     # Called when a new source is added, checks if commit jobs need to be pushed back to account for new source
     def update_commit_schedule(self, first_pull_date, frequency):
+        session = Session()
         # Calculate when the next pull is that cannot take place immediately
         next_scheduled_pull = first_pull_date
         while next_scheduled_pull < datetime.datetime.now():
@@ -258,35 +262,41 @@ class JobManager(threading.Thread):
             else:
                 next_scheduled_pull += relativedelta(days=FREQUENCY_DAY_COUNTS[frequency])
         threshold_date = next_scheduled_pull - relativedelta(days=FREQUENCY_DAY_COUNTS[frequency] / 2)
-        commits_before_threshold = self.session.query(Job).filter(Job.job_type == COMMIT_JOB,
+        commits_before_threshold = session.query(Job).filter(Job.job_type == COMMIT_JOB,
                                                                   Job.timestamp_when_valid < threshold_date)
         for commit in commits_before_threshold:
             commit.timestamp_when_valid = next_scheduled_pull
+        session.close()
 
     # Date/time parameters specify when the job can be carried out
     def add_job(self, valid_datetime, job_type, details):
+        session = Session()
         new_job = Job(timestamp_when_valid=valid_datetime, job_type=job_type, details=details)
-        self.session.add(new_job)
-        self.session.commit()
+        session.add(new_job)
+        session.commit()
+        session.close()
 
     def commit_entries(self, end_batch_id):
-        current_staged_entry = self.session.query(StagedEntry).order_by(StagedEntry.entry_id)\
+        session = Session()
+        current_staged_entry = session.query(StagedEntry).order_by(StagedEntry.entry_id)\
             .filter(StagedEntry.entry_id <= end_batch_id)
         while current_staged_entry is not None:
             self.commit_entry(current_staged_entry)
+        session.close()
 
     def commit_entry(self, staged_entry):
+        session = Session()
         indicator_values = {}
         for indicator in self.indicators_metadata:
             value_location = self.location_engine.convert_postcode(staged_entry.postcode,
                                                                    self.indicators_metadata[indicator]['resolution'])
-            previous_value_entry = self.session.query(IndicatorValue)\
+            previous_value_entry = session.query(IndicatorValue)\
                 .filter(IndicatorValue.indicator == indicator,
                         IndicatorValue.location == value_location,
                         IndicatorValue.date < staged_entry.date)\
                 .order_by(IndicatorValue.date.desc())\
                 .first()
-            following_value_entry = self.session.query(IndicatorValue)\
+            following_value_entry = session.query(IndicatorValue)\
                 .filter(IndicatorValue.indicator == indicator,
                         IndicatorValue.location == value_location,
                         IndicatorValue.date > staged_entry.date)\
@@ -316,5 +326,6 @@ class JobManager(threading.Thread):
                                 property_type=staged_entry.property_type, tenure_type=staged_entry.tenure_type)
         for indicator in indicator_values:
             setattr(new_entry, indicator, indicator_values[indicator])
-        self.session.add(new_entry)
-        self.session.commit()
+        session.add(new_entry)
+        session.commit()
+        session.close()
