@@ -33,90 +33,92 @@ for index in range(MAX_SOURCE_COLUMN_COUNT):
                                         style={'display': 'none'})
     indicator_name_containers.append(indicator_name_container)
 
-layout = html.Div(children=[
-    html.H4("Source Input"),
-    html.Div(id='sources_view_feedback_container'),
-    html.Div(id='inputsContainer',
-             style={'display': 'flex', 'justify-content': 'space-around'},
-             children=[
-                 html.Div(id='leftInputContainer',
-                          style={'display': 'flex-box', 'width': '48%'},
-                          children=[
-                              html.Div("Source Name:"),
-                              dcc.Input(id='sourceNameInput',
-                                        value='',
-                                        type='text',
-                                        style={'width': '100%'}),
-                              html.Div(id='description', children="How to use source input"),
-                              dcc.Input(id='sourceURLInput',
-                                        value='',
-                                        type='text',
-                                        style={'width': '100%'}),
-                              html.Div(id='startAndLocationColumnSelectContainer',
-                                       style={'display': 'flex'},
-                                       children=[
-                                           html.Div(id='startSelectContainer',
-                                                    style={'display': 'flex-box', 'width': '50%'},
-                                                    children=[
-                                                        dcc.RadioItems(id='startOptionSelect',
-                                                                       options=[{'label': "Start today",
-                                                                                 'value': 'startNow'},
-                                                                                {'label': "Start from date",
-                                                                                 'value': 'setDate'}],
-                                                                       value='startNow'),
-                                                        html.Div(id='startDateContainer',
-                                                                 style={'display': 'none'},
-                                                                 children=[
-                                                                     html.Div("Start date:"),
-                                                                     dcc.DatePickerSingle(id='startDateSelect',
-                                                                                          display_format='DD/MM/YYYY',
-                                                                                          first_day_of_week=1,
-                                                                                          number_of_months_shown=3,
-                                                                                          with_full_screen_portal=True,
-                                                                                          initial_visible_month=dt.now()
-                                                                                          )
-                                                                 ])
-                                                    ]),
-                                           html.Div(id='locationSelectContainer',
-                                                    style={'display': 'flex-box', 'width': '50%'},
-                                                    children=[
-                                                        html.Div("Location column index:"),
-                                                        dcc.Input(id='locationColumnInput',
-                                                                  style={'width': '50%'},
-                                                                  type='number',
-                                                                  value='',
-                                                                  size=100,
-                                                                  min=0,
-                                                                  max=100,
-                                                                  step=1,
-                                                                  placeholder="Location", )
-                                                    ]),
-                                       ]),
-                              html.Div("Select update frequency:"),
-                              dcc.Dropdown(id='frequencySelect',
-                                           options=[{'label': FREQUENCIES[value], 'value': value}
-                                                    for value in FREQUENCIES]),
-                              html.Div("Select location resolution:"),
-                              dcc.Dropdown(id='resolutionSelect',
-                                           options=[{'label': AREA_RESOLUTIONS[value], 'value': value}
-                                                    for value in AREA_RESOLUTIONS]),
-                              html.Div("Select number of indicators:"),
-                              html.Div(id='indicatorCountContainer',
-                                       children=[
-                                           dcc.Slider(id='indicatorCountSelect',
-                                                      min=1,
-                                                      max=MAX_SOURCE_COLUMN_COUNT,
-                                                      step=1,
-                                                      value=1)],
-                                       style={'width': '90%', 'display': 'inline-block'}),
-                              html.Div(id='indicatorCountlabel',
-                                       style={'display': 'inline-block', 'width': '10%', 'text-align': 'center'}),
-                              html.Button("Save", id='addSourceButton', style={'margin': '2em'})]),
-                 html.Div(id='indicatorNamesTopContainer',
-                          children=indicator_name_containers,
-                          style={'display': 'flex-box', 'width': '48%'}, )
-             ])
-])
+def create_layout():
+    layout = html.Div(children=[
+        html.H4("Source Input"),
+        html.Div(id='sources_view_feedback_container'),
+        html.Div(id='inputsContainer',
+                 style={'display': 'flex', 'justify-content': 'space-around'},
+                 children=[
+                     html.Div(id='leftInputContainer',
+                              style={'display': 'flex-box', 'width': '48%'},
+                              children=[
+                                  html.Div("Source Name:"),
+                                  dcc.Input(id='sourceNameInput',
+                                            value='',
+                                            type='text',
+                                            style={'width': '100%'}),
+                                  html.Div(id='description', children="How to use source input"),
+                                  dcc.Input(id='sourceURLInput',
+                                            value='',
+                                            type='text',
+                                            style={'width': '100%'}),
+                                  html.Div(id='startAndLocationColumnSelectContainer',
+                                           style={'display': 'flex'},
+                                           children=[
+                                               html.Div(id='startSelectContainer',
+                                                        style={'display': 'flex-box', 'width': '50%'},
+                                                        children=[
+                                                            dcc.RadioItems(id='startOptionSelect',
+                                                                           options=[{'label': "Start today",
+                                                                                     'value': 'startNow'},
+                                                                                    {'label': "Start from date",
+                                                                                     'value': 'setDate'}],
+                                                                           value='startNow'),
+                                                            html.Div(id='startDateContainer',
+                                                                     style={'display': 'none'},
+                                                                     children=[
+                                                                         html.Div("Start date:"),
+                                                                         dcc.DatePickerSingle(id='startDateSelect',
+                                                                                              display_format='DD/MM/YYYY',
+                                                                                              first_day_of_week=1,
+                                                                                              number_of_months_shown=3,
+                                                                                              with_full_screen_portal=True,
+                                                                                              initial_visible_month=dt.now()
+                                                                                              )
+                                                                     ])
+                                                        ]),
+                                               html.Div(id='locationSelectContainer',
+                                                        style={'display': 'flex-box', 'width': '50%'},
+                                                        children=[
+                                                            html.Div("Location column index:"),
+                                                            dcc.Input(id='locationColumnInput',
+                                                                      style={'width': '50%'},
+                                                                      type='number',
+                                                                      value='',
+                                                                      size=100,
+                                                                      min=0,
+                                                                      max=100,
+                                                                      step=1,
+                                                                      placeholder="Location", )
+                                                        ]),
+                                           ]),
+                                  html.Div("Select update frequency:"),
+                                  dcc.Dropdown(id='frequencySelect',
+                                               options=[{'label': FREQUENCIES[value], 'value': value}
+                                                        for value in FREQUENCIES]),
+                                  html.Div("Select location resolution:"),
+                                  dcc.Dropdown(id='resolutionSelect',
+                                               options=[{'label': AREA_RESOLUTIONS[value], 'value': value}
+                                                        for value in AREA_RESOLUTIONS]),
+                                  html.Div("Select number of indicators:"),
+                                  html.Div(id='indicatorCountContainer',
+                                           children=[
+                                               dcc.Slider(id='indicatorCountSelect',
+                                                          min=1,
+                                                          max=MAX_SOURCE_COLUMN_COUNT,
+                                                          step=1,
+                                                          value=1)],
+                                           style={'width': '90%', 'display': 'inline-block'}),
+                                  html.Div(id='indicatorCountLabel',
+                                           style={'display': 'inline-block', 'width': '10%', 'text-align': 'center'}),
+                                  html.Button("Save", id='addSourceButton', style={'margin': '2em'})]),
+                     html.Div(id='indicatorNamesTopContainer',
+                              children=indicator_name_containers,
+                              style={'display': 'flex-box', 'width': '48%'}, )
+                 ])
+    ])
+    return layout
 
 
 @app.callback(Output('startDateContainer', 'style'),
@@ -204,12 +206,12 @@ def process_url_input(url_input_string):
     tokens = url_input_string.split(' ')
     while '-d' in tokens:
         date_token_specifier_index = tokens.index('-d')
-        #get the date token after the -d
+        # get the date token after the -d
         date_token = tokens[date_token_specifier_index + 1]
-        #remove the date token and its specifier
+        # remove the date token and its specifier
         del tokens[date_token_specifier_index]
         del tokens[date_token_specifier_index + 1]
-        #split up the date token and insert it into the tokens list
+        # split up the date token and insert it into the tokens list
         if date_token_specifier_index > len(tokens) - 1:
             tokens = tokens[0: date_token_specifier_index] + split_date_token(date_token)
         else:
@@ -275,7 +277,7 @@ def add_source_button_clicked(number_of_clicks, source_name, source_url, start_d
     return html.Div(feedback_message, style={'background-color': feedback_colour})
 
 
-@app.callback(Output('indicatorCountlabel', 'children'),
+@app.callback(Output('indicatorCountLabel', 'children'),
               [Input('indicatorCountSelect', 'value')])
 def update_indicator_counter(count):
     return str(count)

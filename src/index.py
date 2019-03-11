@@ -44,7 +44,7 @@ def display_page(value):
     elif value == 'modelEditorView':
         return model_editor_view.layout
     elif value == 'sourcesView':
-        return sources_view.layout
+        return sources_view.create_layout()
     elif value == 'dynamoView':
         return dynamo_view.layout
     elif value == 'rdsView':
