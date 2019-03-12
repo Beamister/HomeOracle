@@ -39,7 +39,9 @@ class ServerState:
 
 # Called on first run of the server to initialise first pull job
 def init():
-    job_manager.add_job(datetime.datetime.now(), PULL_LAND_REGISTRY_JOB, '')
+    # Commented out for front end deployment to AWS
+    pass
+    # job_manager.add_job(datetime.datetime.now(), PULL_LAND_REGISTRY_JOB, '')
 
 
 Base.metadata.create_all(database_engine)
