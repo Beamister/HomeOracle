@@ -10,6 +10,7 @@ import property_view
 import sources_view
 import rds_view
 import model_view
+import home_view
 from server import *
 
 # app.css.append_css({'external_url' : 'https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css'})
@@ -50,7 +51,7 @@ def display_page(value):
     elif value == 'rdsView':
         return rds_view.layout
     else:
-        return 'Welcome to the home page'
+        return home_view.layout
 
 
 application = app.server

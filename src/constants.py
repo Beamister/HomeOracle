@@ -11,6 +11,7 @@ DEFAULT_TARGET_HEADER = 'Median Value'
 
 SUMMARY_ATTRIBUTES = ['Count', 'Mean', 'STD', 'Min', '25%', '50%', '75%', 'Max']
 
+DESCRIPTION_FILE_PATH = './description.md'
 
 DEFAULT_3D_CAMERA = {'up': {'x': 0, 'y': 0, 'z': 1},
                      'center': {'x': 0, 'y': 0, 'z': 0},

@@ -21,6 +21,8 @@ sources_table = dynamodb.Table('Sources')
 source_data = sources_table.get_item(Key={'SourceName': source_name})['Item']
 session_maker = sessionmaker(bind=database_engine)
 session = session_maker()
+
+# Remove each indicator column in the core dataset
 Table('core_dataset', base.metadata, autoload=True, autoload_with=database_engine,
       keep_existing=False, extend_existing=True)
 table_headers = base.metadata.tables['core_dataset'].columns.keys()
@@ -30,5 +32,12 @@ for indicator in source_data['indicators'].keys():
         database_engine.execute('ALTER TABLE core_dataset DROP COLUMN %s' % (indicator))
     else:
         print('Indicator not found in database')
+
+# Remove jobs pulling from source
+Table('jobs', base.metadata, autoload=True, autoload_with=database_engine,
+      keep_existing=False, extend_existing=True)
+session.query(base.metadata.tables['jobs']).filter(base.metadata.tables['jobs'].details == source_name).delete()
+
+# Remove the source from the sources table
 sources_table.delete_item(Key={'SourceName': source_name})
 session.close()
