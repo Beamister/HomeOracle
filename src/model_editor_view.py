@@ -168,6 +168,14 @@ def validate_model_input(model_name, model_type, estimator_count, enable_max_tre
             result = "Please select epsilon value"
     else:
         result = "Please select a model type"
+    # Check model input count does not exceed limit
+    parent_inputs = []
+    for parent_model in input_models:
+        parent_inputs += model_manager.get_model_inputs(parent_model)
+    # Remove duplicates
+    parent_inputs = list(set(parent_inputs))
+    if len(parent_inputs) + len(input_parameters) > MAX_MODEL_INPUTS:
+        result = "Model exceeds maximum inputs"
     return result
 
 

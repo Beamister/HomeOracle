@@ -146,7 +146,7 @@ class ModelManager:
                 if column_header not in CORE_METADATA_HEADERS]
 
     def get_max_model_inputs(self):
-        return self.max_inputs
+        return MAX_MODEL_INPUTS# self.max_inputs
 
     def get_model_dependencies(self, model_name):
         dependencies_list = []

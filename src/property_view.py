@@ -237,7 +237,7 @@ def update_prediction(n_clicks, model_name, current_price, *parameter_inputs):
     max_model_input = model_manager.get_max_model_inputs()
     model_input_count = len(model_manager.get_model_inputs(model_name))
     start_parameter_inputs = parameter_inputs[0: model_input_count]
-    end_parameter_inputs = parameter_inputs[max_model_input: (max_model_input + model_input_count)]
+    end_parameter_inputs = parameter_inputs[model_input_count: (max_model_input + model_input_count)]
     # Check for invalid input
     if current_price is None or None in start_parameter_inputs or None in end_parameter_inputs:
         return "Invalid input"
