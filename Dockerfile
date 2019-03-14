@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.7
 RUN apt-get update
 RUN apt-get -y install libblas-dev liblapack-dev libatlas-base-dev gfortran
 RUN pip install numpy
