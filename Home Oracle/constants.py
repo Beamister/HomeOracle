@@ -1,6 +1,6 @@
 import os.path
 
-DATA_DIRECTORY = 'Data'
+DATA_DIRECTORY = '../Data'
 DEFAULT_DATA_FILE = 'housing.csv'
 DATA_DIRECTORY_PATH = os.path.join(os.path.split(__file__)[0], DATA_DIRECTORY)
 DEFAULT_DATA_PATH = os.path.join(DATA_DIRECTORY_PATH, DEFAULT_DATA_FILE)
