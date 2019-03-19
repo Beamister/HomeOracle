@@ -40,8 +40,7 @@ class ServerState:
 # Called on first run of the server to initialise first pull job
 def init():
     # Commented out for front end deployment to AWS
-    pass
-    # job_manager.add_job(datetime.datetime.now(), PULL_LAND_REGISTRY_JOB, '')
+    job_manager.add_job(datetime.datetime.now(), PULL_LAND_REGISTRY_JOB, '')
 
 
 Base.metadata.create_all(database_engine)
@@ -57,8 +56,8 @@ external_stylesheets = ['']
 # Reflect the dataset table from the database
 Table('core_dataset', Base.metadata, autoload=True, autoload_with=database_engine, keep_existing=False, extend_existing=True)
 
-# switch to enable just the front end for debugging purposes
-if '-f' not in sys.argv:
+# switch to enable the job manager
+if '-j' in sys.argv:
     job_manager.start()
 
 model_manager = ModelManager(database_engine)
