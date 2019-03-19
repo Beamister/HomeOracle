@@ -2,7 +2,7 @@
 .elasticbeanstalk
 .git
 .gitignore
-bin
 Documentation
 prototype
-Data
+Data/GSS_to_names
+Data/Postcode_Directory_Documents
