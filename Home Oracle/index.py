@@ -58,4 +58,4 @@ application = app.server
 
 if __name__ == '__main__':
     application = app
-    application.run_server(debug=True)
+    application.run_server(debug=True, port=8050, host='0.0.0.0')
