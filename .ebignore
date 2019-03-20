@@ -1,0 +1,19 @@
+# Documentation directory
+Docmentation
+
+# Database init data directories
+Data/GSS_to_names
+Data/Postcode_Directory_Documents
+
+# Jetbrains directory
+.idea
+
+# pycache directories
+**__pycache__**
+
+# Virtual environment
+venv
+
+# admin scripts directory
+scripts
+
